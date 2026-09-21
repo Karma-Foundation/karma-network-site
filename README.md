@@ -31,6 +31,7 @@ are self-hosted at build time by `next/font`, so the browser makes no third-part
 | `LEDGER_MODE` | `mock` | `mock` or `rpc`. `rpc` is a stub that throws "not configured". |
 | `SHOW_DUMMY_BANNER` | on | The banner shows unless this is exactly `false`. A missing variable fails safe. |
 | `LEDGER_RPC_URL` | - | Read by the `rpc` stub only. |
+| `SITE_PASSWORD` | unset | When set, the whole site (pages and `/api/v1`) answers 401 until the visitor enters this password (HTTP Basic auth, any username). Set it on the host only. This repo is public: never commit the value. Unset it to open the site. |
 
 ## Layout
 
