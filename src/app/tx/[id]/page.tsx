@@ -5,12 +5,15 @@ import { AddrLink, Crumb } from "@/components/ui";
 import { K, fmt, shortTx, timeStr } from "@/lib/format";
 import { getLedger } from "@/lib/ledger";
 import { TX_FEE, TX_ID_RE } from "@/lib/ledger/rules";
+import { isLive } from "@/lib/ledger";
+import { LiveTx } from "@/live/Ledger";
 
 export const metadata: Metadata = { title: "Ledger" };
 export const dynamic = "force-dynamic";
 
 export default async function TxPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (isLive()) return <LiveTx id={id} />;
   if (!TX_ID_RE.test(id)) notFound();
   const ledger = getLedger();
   const t = await ledger.tx(id);

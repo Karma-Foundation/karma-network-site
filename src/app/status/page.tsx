@@ -3,11 +3,14 @@ import { UPTIME } from "@/components/ui";
 import { ago, fmt, minsUntil } from "@/lib/format";
 import { getLedger } from "@/lib/ledger";
 import { BLOCK_MINUTES, blockTime } from "@/lib/ledger/rules";
+import { isLive } from "@/lib/ledger";
+import { LiveStatus } from "@/live/Rules";
 
 export const metadata: Metadata = { title: "Status" };
 export const dynamic = "force-dynamic";
 
 export default async function Status() {
+  if (isLive()) return <LiveStatus />;
   const ledger = getLedger();
   const [supply, runners, incidents] = await Promise.all([ledger.supply(), ledger.runners(), ledger.incidents()]);
   const H = supply.height;

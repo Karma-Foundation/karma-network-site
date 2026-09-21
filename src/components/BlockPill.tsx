@@ -10,8 +10,8 @@ const REFRESH_MS = 30_000;
  * Live block height. Polls this site's own /api/v1/supply rather than recomputing from the
  * genesis constants, so it keeps working unchanged when the ledger source becomes rpc.
  */
-export function BlockPill({ initialHeight }: { initialHeight: number }) {
-  const [height, setHeight] = useState(initialHeight);
+export function BlockPill({ initialHeight }: { initialHeight: number | null }) {
+  const [height, setHeight] = useState<number | null>(initialHeight);
 
   useEffect(() => {
     let alive = true;
@@ -35,7 +35,7 @@ export function BlockPill({ initialHeight }: { initialHeight: number }) {
   return (
     <Link className="blockpill mono" href="/status">
       <span className="dot" aria-hidden="true" />
-      <span className="num">Block {fmt(height)}</span>
+      <span className="num">Block {height === null ? "-" : fmt(height)}</span>
     </Link>
   );
 }

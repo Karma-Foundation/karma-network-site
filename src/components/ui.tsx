@@ -240,9 +240,9 @@ export function UpgradeTable({ list }: { list: Upgrade[] }) {
   );
 }
 
-export function DocCards() {
+export function DocCards({ specTitle }: { specTitle?: string } = {}) {
   const d: [string, string, string][] = [
-    [`Protocol specification ${SPEC_VERSION}`, "Issuance schedule, distribution, reward formula, signature scheme", "/protocol"],
+    [specTitle ?? `Protocol specification ${SPEC_VERSION}`, "Issuance schedule, distribution, reward formula, signature scheme", "/protocol"],
     ["Source code", "Protocol node, open repository, release tags per version", "/documents"],
     ["Whitepaper", "Why the protocol exists and what it rewards", "/why"],
     ["Governance framework", "Elections, recall, upgrade process, signer duties", "/governance"],

@@ -17,11 +17,14 @@ import {
   STAKER_SPLIT_PCT,
   UPGRADE_NOTICE_DAYS,
 } from "@/lib/ledger/rules";
+import { isLive } from "@/lib/ledger";
+import { LiveProtocol } from "@/live/Rules";
 
 export const metadata: Metadata = { title: "Protocol" };
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function Protocol() {
+  if (isLive()) return <LiveProtocol />;
   const ledger = getLedger();
   const [supply, wallets] = await Promise.all([ledger.supply(), ledger.wallets()]);
   const nextHalving = HALVING - (supply.height % HALVING);

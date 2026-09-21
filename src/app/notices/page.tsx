@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { dateStr } from "@/lib/format";
 import { getLedger } from "@/lib/ledger";
+import { isLive } from "@/lib/ledger";
+import { LiveNotices } from "@/live/Rules";
 
 export const metadata: Metadata = { title: "Notices" };
-export const revalidate = 600;
+export const dynamic = "force-dynamic";
 
 export default async function Notices() {
+  if (isLive()) return <LiveNotices />;
   const notices = await getLedger().notices();
   return (
     <div className="wrap page">

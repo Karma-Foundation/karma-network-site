@@ -3,8 +3,9 @@
 karmanetwork.org - the public record of the Karma protocol: the rules, the ledger, who controls
 what, and what changed. Read-only. Sells nothing. No analytics, no cookies, no external scripts.
 
-**Everything on the site today is a simulation.** The ledger is a seeded dummy chain
-(`LEDGER_MODE=mock`) and a banner on every page says so. Bracketed text (`[EMAIL]`, `[DATE]`,
+**Production reads the live ledger** (`LEDGER_MODE=rpc`) through the protocol's public read-only
+API. `LEDGER_MODE=mock` is the original seeded simulation, kept for design work and tests; a
+banner on every page says which one you are looking at. Bracketed text (`[EMAIL]`, `[DATE]`,
 `[Operator entity]` ...) marks decisions that are still open; the brackets are intentional.
 
 - Live: https://web-production-72973b.up.railway.app (Railway project `karma-network`, service `web`)
@@ -28,9 +29,9 @@ are self-hosted at build time by `next/font`, so the browser makes no third-part
 
 | Env | Default | Meaning |
 |---|---|---|
-| `LEDGER_MODE` | `mock` | `mock` or `rpc`. `rpc` is a stub that throws "not configured". |
+| `LEDGER_MODE` | `mock` | `mock` (seeded simulation) or `rpc` (live ledger, see "Live mode"). Production runs `rpc`. |
 | `SHOW_DUMMY_BANNER` | on | The banner shows unless this is exactly `false`. A missing variable fails safe. |
-| `LEDGER_RPC_URL` | - | Read by the `rpc` stub only. |
+| `LEDGER_RPC_URL` | `https://chain.karmaterminal.com/api/v1/public` | Base of the ledger's public API, used in `rpc` mode. |
 | `SITE_PASSWORD` | unset | When set, the whole site (pages and `/api/v1`) answers 401 until the visitor enters this password (HTTP Basic auth, any username). Set it on the host only. This repo is public: never commit the value. Unset it to open the site. |
 
 ## Layout
@@ -116,10 +117,68 @@ number, a tx id and a tx prefix; 8 notices, none containing an em or en dash.
 the one incident, the announced bridge transfer and the pending Grant #9 transfer. Nothing was
 invented and nothing was taken from the live chain.
 
-## Swapping mock for rpc
+## Live mode (`LEDGER_MODE=rpc`)
 
-Set `LEDGER_MODE=rpc` and implement `RpcLedger` in `src/lib/ledger/rpc.ts`. **This is not a
-config flip**, for three reasons.
+Live mode does NOT go through `LedgerSource`. The mock's shapes (whole-number amounts, ranked
+balances, signer sets, versioned upgrades) describe the prototype's imagined chain, and forcing
+real data into them would mean inventing the missing parts. Instead:
+
+```
+src/lib/ledger/live/api.ts    fetch + Next data cache, res.ok and envelope checks
+src/lib/ledger/live/data.ts   typed readers, the address / tx id patterns, the REDACTION rule
+src/lib/ledger/live/json.ts   what /api/v1/* serves in live mode
+src/live/*.tsx                the live view of every route
+```
+
+Each route's `page.tsx` starts with `if (isLive()) return <LiveX />`; the mock page follows.
+All data pages are `force-dynamic` so the mode is read at runtime, and every upstream call is
+held in Next's data cache (30 s to 5 min) because each one costs 0.3 to 2 s.
+
+**It uses only the public, unauthenticated API** - the same surface the standalone validator
+reads. No admin key, runner key or session is used, on purpose: this site is public, so it may
+show only what the chain already serves to anyone.
+
+### What each route shows live
+
+| Route | Live source | State |
+|---|---|---|
+| `/`, `/protocol` | `/network/overview`, `/supply`, `/parameters`, `/blocks` | real rules, real supply identity |
+| `/ledger/blocks`, `/block/[n]` | `/blocks`, `/blocks/:n`, `/rewards`, `/replay-envelopes` | real: hashes, proposer, signatures, actions (action + amount only), reward cycles |
+| `/ledger/transactions` | `/transactions` | real transfers and grants, addresses only. No stakes, no type filter, no total |
+| `/governance`, `/governance/[key]` | `/parameters`, `/parameters/history` | real parameters and change log. No signers or elections: not on the ledger |
+| `/notices` | `/parameters/history` | one notice per day with a parameter change. Nothing else is published |
+| `/runners`, `/status` | `/runners/active`, `/validators`, `/supply` | real. No incident log exists |
+| `/search` | - | block number, full 64-hex address, tx UUID. No partial or label search |
+| `/tx/[id]` | `/transactions` x5 | PARTIAL: found only among the latest 500 public transactions |
+| `/address/[addr]` | `/transactions` x5, `/mempool?to=` | PARTIAL: recent transfers and pending incoming. NO balance |
+| `/ledger/addresses` | none | NOT PUBLISHED |
+| `/wallets` | `/parameters`, `/supply` | pool shares and pre-mine totals only. Addresses, balances, outflows, signers NOT PUBLISHED |
+
+### What is missing, and how to get it
+
+All of these are new routes or fixes in `Karma-Foundation/Karma-Protocol` (the protocol owner's
+lane: a PR for them to merge, never a direct change). All must stay address-only.
+
+1. `GET /public/addresses?limit&offset` - address, balance, staked, rank. Unlocks `/ledger/addresses` and "who holds Karma".
+2. `GET /public/addresses/:addr` - balance, staked, first seen, tx count, paginated history. Unlocks the address page.
+3. `GET /public/transactions/:id` - one transfer or grant by id, with its block number.
+4. `/public/transactions`: add `block_number`, a `type` filter, a total count, and stake / unstake rows.
+5. Protocol wallets: publish the Foundation and Tech Builders pool ADDRESSES (today the pool wallet ids are deliberately stripped) so they resolve through route 2. Plus the pre-mine recipients and vesting schedule.
+6. Signers and thresholds of those wallets, if and when they are multisig on the ledger. Today they are not, so there is nothing to read.
+7. An incident log and software-version history, if the site should list upgrades and outages.
+8. One consistency fix to the change-log endpoint, filed privately in the protocol repo. Until it lands this site redacts on its own side (see below).
+
+### Redaction
+
+`data.ts` shows a parameter value only when its key is in the public `/parameters` list AND the
+value is a plain number, boolean or hex id; everything else renders as `[withheld]`. Parameter
+descriptions are never shown (some mention people). Block actions show only action, amount and
+payload hash. Actor ids other than `system:*` render as "operator". Tests: `redaction.test.ts`.
+
+## Notes from before live mode existed
+
+The sections below were written for the mock-only v1. The live-chain comparison table is still
+the reference for how far the MOCK is from reality; `RpcLedger` remains an unused stub.
 
 ### 1. The live API cannot back every route yet
 
