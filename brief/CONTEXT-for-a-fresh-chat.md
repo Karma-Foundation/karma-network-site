@@ -60,10 +60,10 @@ were done on 22 Sep 2026 from Roy's Mac:
 GitHub-driven: a Railway service sourced from this repo builds and deploys every merge to
 `main` (Nixpacks, `npm run build` / `npm start`, env `LEDGER_MODE=mock` and
 `SHOW_DUMMY_BANNER=true`). Your job ends at a merged PR; Railway does the rest.
-Check `brief/DEPLOY-STATUS.md` for whether that service is connected yet. If it says NOT
-CONNECTED, build and merge anyway, and tell Roy in your final message that the one remaining
-step is his: connect the repo in the Railway dashboard. Do not ask him for a Railway token and
-do not try to install the CLI - it is a two-tap job for him and a credentials problem for you.
+That service is connected as of 22 Sep 2026 - see `brief/DEPLOY-STATUS.md`, which also explains
+why the deployments before your first app merge show FAILED (there was nothing to build) and
+what to do if one fails afterwards. Do not ask Roy for a Railway token and do not try to
+install the CLI.
 
 **Build the app at the REPO ROOT**, not in a subfolder. The plan's step 2 creates a
 `karma-network-site/` directory; here the repo already is that directory. Scaffold into a temp
