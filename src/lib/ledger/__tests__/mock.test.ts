@@ -112,6 +112,14 @@ describe("MockLedger shapes", () => {
     expect(await l.search("   ")).toEqual({ kind: "empty" });
   });
 
+  it("no person is named anywhere in the mock data", async () => {
+    const l = at(36423);
+    const w = await l.wallets();
+    const dump = JSON.stringify([w, await l.runners(), await l.upgrades(), await l.notices(), await l.incidents(), (await l.transactions(1, "Transfer")).items]);
+    expect(dump).not.toMatch(/\b(Roy|Roei|Andrey)\b/);
+    expect(w.foundation.signers.slice(0, 2).map((s) => s.name)).toEqual(["Person 1", "Person 2"]);
+  });
+
   it("eight notices, newest first, none with an em or en dash", async () => {
     const n = await at(36423).notices();
     expect(n).toHaveLength(8);
