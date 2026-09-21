@@ -73,7 +73,7 @@ Dummy banner: shown on every page while `SHOW_DUMMY_BANNER=true`. Text: "Simulat
 6. Add `/api/v1/*`.
 7. README: what the site is, how to run, how to swap `mock` for `rpc`, the `LedgerSource` contract.
 8. ~~Create the repo~~ **Already done**: `Karma-Foundation/karma-network-site` exists and holds this brief. Every change from here goes through a PR (context file, section 3).
-9. ~~Create the Railway project~~ **Already done**: project `karma-network`. Deployment is GitHub-driven - a merge to `main` deploys. You need no Railway credentials; see `brief/DEPLOY-STATUS.md` for whether the service is connected.
+9. ~~Create the Railway project~~ **Already done**: project `karma-network`. Deployment is GitHub-driven - a merge to `main` deploys. The service is connected to this repo; you need no Railway credentials. Live URL and failure notes are in `brief/DEPLOY-STATUS.md`.
 10. Open every route on the live URL. Fix anything broken. Then report.
 
 ## Definition of done
