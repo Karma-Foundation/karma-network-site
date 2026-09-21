@@ -4,12 +4,15 @@ import { Crumb, Numbered } from "@/components/ui";
 import { dateStr, fmt } from "@/lib/format";
 import { getLedger } from "@/lib/ledger";
 import { blockTime } from "@/lib/ledger/rules";
+import { isLive } from "@/lib/ledger";
+import { LiveParameter } from "@/live/Rules";
 
 export const metadata: Metadata = { title: "Governance" };
-export const revalidate = 600;
+export const dynamic = "force-dynamic";
 
 export default async function UpgradePage({ params }: { params: Promise<{ version: string }> }) {
   const { version } = await params;
+  if (isLive()) return <LiveParameter name={version} />;
   const ledger = getLedger();
   const [upgrades, runners] = await Promise.all([ledger.upgrades(), ledger.runners()]);
   const u = upgrades.find((x) => x.v === decodeURIComponent(version));

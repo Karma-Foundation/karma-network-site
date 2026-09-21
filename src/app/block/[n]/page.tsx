@@ -5,6 +5,8 @@ import { Crumb, TxTable } from "@/components/ui";
 import { K, ago, fmt, timeStr } from "@/lib/format";
 import { getLedger } from "@/lib/ledger";
 import { SHARES } from "@/lib/ledger/rules";
+import { isLive } from "@/lib/ledger";
+import { LiveBlock } from "@/live/Ledger";
 
 export const metadata: Metadata = { title: "Ledger" };
 export const dynamic = "force-dynamic";
@@ -13,6 +15,7 @@ export default async function BlockPage({ params }: { params: Promise<{ n: strin
   const { n: raw } = await params;
   if (!/^\d{1,12}$/.test(raw)) notFound();
   const n = Number(raw);
+  if (isLive()) return <LiveBlock n={n} />;
   const ledger = getLedger();
   const [b, supply, wallets] = await Promise.all([ledger.block(n), ledger.supply(), ledger.wallets()]);
   if (!b) notFound();

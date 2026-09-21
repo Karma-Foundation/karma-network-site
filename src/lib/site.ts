@@ -6,3 +6,6 @@ export function pageParam(raw: string | string[] | undefined): number {
   const n = Number(Array.isArray(raw) ? raw[0] : raw);
   return Number.isInteger(n) && n >= 1 && n <= 1_000_000 ? n : 1;
 }
+
+export const LIVE_BANNER_TEXT =
+  "Live data, read from the Karma ledger through its public API. Where the ledger does not publish something yet, the page says so instead of estimating; bracketed text marks decisions still open.";

@@ -6,12 +6,15 @@ import { AddrLink, Crumb, Numbered, SignersTable, TxTable } from "@/components/u
 import { K, fmt, pct, short } from "@/lib/format";
 import { getLedger, type Tx } from "@/lib/ledger";
 import { MAX_SUPPLY, blockTime } from "@/lib/ledger/rules";
+import { isLive } from "@/lib/ledger";
+import { LiveAddress } from "@/live/Ledger";
 
 export const metadata: Metadata = { title: "Ledger" };
 export const dynamic = "force-dynamic";
 
 export default async function AddressPage({ params }: { params: Promise<{ addr: string }> }) {
   const { addr } = await params;
+  if (isLive()) return <LiveAddress addr={addr} />;
   const ledger = getLedger();
   const o = await ledger.address(addr);
   if (!o) notFound();

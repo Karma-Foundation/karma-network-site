@@ -14,7 +14,7 @@ const LINKS = [
   { href: "/documents", label: "Documents", match: ["/documents"] },
 ];
 
-export function Nav({ initialHeight }: { initialHeight: number }) {
+export function Nav({ initialHeight }: { initialHeight: number | null }) {
   const pathname = usePathname();
   // The menu is open only for the path it was opened on, so any navigation closes it.
   const [openOn, setOpenOn] = useState<string | null>(null);

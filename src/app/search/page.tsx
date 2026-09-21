@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { HoldersTable } from "@/components/ui";
-import { getLedger } from "@/lib/ledger";
+import { getLedger, isLive } from "@/lib/ledger";
+import { ADDRESS_RE, TX_ID_RE } from "@/lib/ledger/live/data";
 
 export const metadata: Metadata = { title: "Ledger" };
 export const dynamic = "force-dynamic";
@@ -10,6 +11,18 @@ export const dynamic = "force-dynamic";
 export default async function Search({ searchParams }: { searchParams: Promise<{ q?: string | string[] }> }) {
   const raw = (await searchParams).q;
   const q = (Array.isArray(raw) ? raw[0] : raw) ?? "";
+  if (isLive()) {
+    const s = q.trim().toLowerCase().slice(0, 200);
+    if (/^\d[\d,]*$/.test(s)) redirect(`/block/${s.replace(/,/g, "")}`);
+    if (ADDRESS_RE.test(s)) redirect(`/address/${s}`);
+    if (TX_ID_RE.test(s)) redirect(`/tx/${s}`);
+    return (
+      <div className="wrap page">
+        <h1>Search</h1>
+        <p className="body" style={{ marginTop: 12 }}>Enter a block number, a full address (64 hexadecimal characters) or a transaction id. The ledger has no search endpoint, so partial matches and labels cannot be looked up.</p>
+      </div>
+    );
+  }
   const ledger = getLedger();
   const r = await ledger.search(q.slice(0, 200));
   if (r.kind === "block") redirect(`/block/${r.n}`);

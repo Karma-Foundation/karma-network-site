@@ -4,12 +4,15 @@ import { notFound } from "next/navigation";
 import { Crumb } from "@/components/ui";
 import { dateStr } from "@/lib/format";
 import { getLedger } from "@/lib/ledger";
+import { isLive } from "@/lib/ledger";
+import { LiveNotice } from "@/live/Rules";
 
 export const metadata: Metadata = { title: "Notices" };
-export const revalidate = 600;
+export const dynamic = "force-dynamic";
 
 export default async function NoticePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  if (isLive()) return <LiveNotice slug={slug} />;
   const n = (await getLedger().notices()).find((x) => x.slug === slug);
   if (!n) notFound();
   return (

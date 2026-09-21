@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { fmt } from "@/lib/format";
 import { getLedger } from "@/lib/ledger";
+import { isLive } from "@/lib/ledger";
+import { LiveRunners } from "@/live/Rules";
 
 export const metadata: Metadata = { title: "Runners" };
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function Runners() {
+  if (isLive()) return <LiveRunners />;
   const runners = await getLedger().runners();
   return (
     <div className="wrap page">

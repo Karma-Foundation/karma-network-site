@@ -3,8 +3,8 @@ import { IBM_Plex_Mono, IBM_Plex_Sans, Libre_Caslon_Text } from "next/font/googl
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { getLedger, showDummyBanner } from "@/lib/ledger";
-import { BANNER_TEXT } from "@/lib/site";
+import { currentHeight, isLive, showDummyBanner } from "@/lib/ledger";
+import { BANNER_TEXT, LIVE_BANNER_TEXT } from "@/lib/site";
 import "./globals.css";
 
 const serif = Libre_Caslon_Text({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-serif", display: "swap" });
@@ -22,7 +22,7 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1, view
 const THEME_SCRIPT = `try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}`;
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const { height } = await getLedger().supply();
+  const height = await currentHeight();
   return (
     <html lang="en" className={`${serif.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
@@ -32,7 +32,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Nav initialHeight={height} />
         {showDummyBanner() && (
           <div className="wrap banner">
-            <div className="note" role="note">{BANNER_TEXT}</div>
+            <div className="note" role="note">{isLive() ? LIVE_BANNER_TEXT : BANNER_TEXT}</div>
           </div>
         )}
         <main>{children}</main>

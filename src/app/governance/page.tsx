@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import { SignersTable, UpgradeTable } from "@/components/ui";
 import { getLedger } from "@/lib/ledger";
 import { RECALL_REQUEST_PCT, SIGNER_TERM_MONTHS, UPGRADE_NOTICE_DAYS } from "@/lib/ledger/rules";
+import { isLive } from "@/lib/ledger";
+import { LiveGovernance } from "@/live/Rules";
 
 export const metadata: Metadata = { title: "Governance" };
-export const revalidate = 600;
+export const dynamic = "force-dynamic";
 
 export default async function Governance() {
+  if (isLive()) return <LiveGovernance />;
   const ledger = getLedger();
   const [upgrades, w] = await Promise.all([ledger.upgrades(), ledger.wallets()]);
   return (

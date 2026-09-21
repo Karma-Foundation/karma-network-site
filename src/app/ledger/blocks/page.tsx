@@ -5,6 +5,8 @@ import { K, ago, fmt } from "@/lib/format";
 import { getLedger } from "@/lib/ledger";
 import { SHARES } from "@/lib/ledger/rules";
 import { pageParam } from "@/lib/site";
+import { isLive } from "@/lib/ledger";
+import { LiveBlocks } from "@/live/Ledger";
 
 export const metadata: Metadata = { title: "Ledger" };
 export const dynamic = "force-dynamic";
@@ -13,6 +15,7 @@ const DISTRIBUTION = `${SHARES.builders} builders · ${SHARES.foundation} founda
 
 export default async function Blocks({ searchParams }: { searchParams: Promise<{ p?: string | string[] }> }) {
   const page = pageParam((await searchParams).p);
+  if (isLive()) return <LiveBlocks page={page} />;
   const data = await getLedger().blocks(page);
   return (
     <div className="wrap page">

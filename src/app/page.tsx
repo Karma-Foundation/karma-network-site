@@ -3,10 +3,13 @@ import { DocCards, HoldersTable, RULE_TEXT, ShareBars, Stats, UpgradeTable, Wall
 import { K, fmt, pct } from "@/lib/format";
 import { getLedger } from "@/lib/ledger";
 import { PRE_MINE } from "@/lib/ledger/rules";
+import { isLive } from "@/lib/ledger";
+import { LiveHome } from "@/live/Home";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
+  if (isLive()) return <LiveHome />;
   const ledger = getLedger();
   const [supply, runners, first, wallets, upgrades] = await Promise.all([
     ledger.supply(),

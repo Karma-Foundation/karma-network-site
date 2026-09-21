@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import { HoldersTable, WalletCard } from "@/components/ui";
 import { K, pct } from "@/lib/format";
 import { getLedger } from "@/lib/ledger";
+import { isLive } from "@/lib/ledger";
+import { LiveWallets } from "@/live/Rules";
 
 export const metadata: Metadata = { title: "Wallets" };
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function WalletsPage() {
+  if (isLive()) return <LiveWallets />;
   const ledger = getLedger();
   const [supply, w] = await Promise.all([ledger.supply(), ledger.wallets()]);
   const f = w.foundation;

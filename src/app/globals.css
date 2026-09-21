@@ -146,3 +146,6 @@ td.wrap-ok{white-space:normal;min-width:240px}
 .rows>div{min-width:0;overflow-wrap:anywhere}
 @media (max-width:1000px){.rows{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:600px){.links.open .blockpill{display:inline-flex}}
+.notice-item>div{min-width:0}.notice-item .sum{overflow-wrap:anywhere}
+@media (max-width:600px){.notice-item{grid-template-columns:minmax(0,1fr)}}
+.notice-item h3{overflow-wrap:anywhere}
