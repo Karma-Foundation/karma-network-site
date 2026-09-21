@@ -108,7 +108,7 @@ const txId = (block: number, idx: number): string =>
 
 /* ---------- runners ---------- */
 const RUNNERS = [
-  { id: "runner-1", op: "Andrey (protocol team)", city: "Frankfurt", since: 1, version: "v1.3.2", independent: false },
+  { id: "runner-1", op: "Person 2 (protocol team)", city: "Frankfurt", since: 1, version: "v1.3.2", independent: false },
   { id: "runner-2", op: "[Independent operator]", city: "Berlin", since: 9120, version: "v1.3.2", independent: true },
   { id: "runner-3", op: "[Independent operator]", city: "Amsterdam", since: 14880, version: "v1.3.1", independent: true },
   { id: "runner-4", op: "[Independent operator]", city: "Tel Aviv", since: 24110, version: "v1.3.2", independent: true },
@@ -268,15 +268,15 @@ interface Chain {
 
 /* ---------- governance ---------- */
 const SIGNERS_F: Signer[] = [
-  { n: 1, name: "Roy", role: "Founder, Karma community", key: "Fk2n…9aQe", since: "genesis", ends: "Jan 2027" },
-  { n: 2, name: "Andrey", role: "Protocol engineering", key: "Wd7b…3xLp", since: "genesis", ends: "Jan 2027" },
+  { n: 1, name: "Person 1", role: "Founder, Karma community", key: "Fk2n…9aQe", since: "genesis", ends: "Jan 2027" },
+  { n: 2, name: "Person 2", role: "Protocol engineering", key: "Wd7b…3xLp", since: "genesis", ends: "Jan 2027" },
   { n: 3, name: "[Independent signer]", role: "[Name, affiliation, no financial relationship to founders]", key: "Qm4r…7vTn", since: "blk 18,400", ends: "May 2027" },
   { n: 4, name: "[Independent signer]", role: "[Name, affiliation, no financial relationship to founders]", key: "Zs9c…2kHb", since: "blk 18,400", ends: "May 2027" },
   { n: 5, name: "Seat open", role: "Community-elected. Nominations open until [DATE].", key: "-", since: "-", ends: "-", open: true },
 ];
 const SIGNERS_T: Signer[] = [
-  { n: 1, name: "Andrey", role: "Protocol engineering", key: "Wd7b…3xLp", since: "genesis", ends: "Jan 2027" },
-  { n: 2, name: "Roy", role: "Founder, Karma community", key: "Fk2n…9aQe", since: "genesis", ends: "Jan 2027" },
+  { n: 1, name: "Person 2", role: "Protocol engineering", key: "Wd7b…3xLp", since: "genesis", ends: "Jan 2027" },
+  { n: 2, name: "Person 1", role: "Founder, Karma community", key: "Fk2n…9aQe", since: "genesis", ends: "Jan 2027" },
   { n: 3, name: "[Independent runner operator]", role: "Operates runner-4", key: "Tn8v…5hRc", since: "blk 24,110", ends: "Jun 2027" },
 ];
 const UPGRADES: Upgrade[] = [

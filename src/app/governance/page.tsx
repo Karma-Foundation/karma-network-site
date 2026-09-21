@@ -38,7 +38,7 @@ export default async function Governance() {
           <div className="k">Who votes</div><div>Any address with a balance above 0 at the snapshot block. One address, one vote.</div>
           <div className="k">Nominations</div><div>Open to anyone. A nominee publishes name, affiliation and any financial relationship to existing signers.</div>
           <div className="k">Recall</div><div>A recall vote opens when {RECALL_REQUEST_PCT}% of holding addresses sign a request. Passes at a simple majority of votes cast.</div>
-          <div className="k">Founder seats</div><div>Roy and Andrey hold seats until the first election in January 2027. After that, founders stand like everyone else.</div>
+          <div className="k">Founder seats</div><div>Person 1 and Person 2 hold seats until the first election in January 2027. After that, founders stand like everyone else.</div>
         </div>
       </div>
     </div>
