@@ -53,7 +53,8 @@ were done on 22 Sep 2026 from Roy's Mac:
 
 - GitHub: `Karma-Foundation/karma-network-site`, public, `delete_branch_on_merge` on.
 - Railway: project **`karma-network`** (id `722c3a4f-4f32-4a99-a7fb-791293386234`), workspace
-  "roeilevav's Projects", environment `production`.
+  "roeilevav's Projects", environment `production`, service **`web`** with the plan's two
+  variables already set. Reserved URL: https://web-production-72973b.up.railway.app
 
 **You have no Railway credentials, and you do not need any.** Deployment is meant to be
 GitHub-driven: a Railway service sourced from this repo builds and deploys every merge to
