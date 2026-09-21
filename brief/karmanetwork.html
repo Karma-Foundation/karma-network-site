@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Karma Network</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F6F3EC;--panel:#FFFFFF;--ink:#17130E;--body:#3E372D;--muted:#5F5749;--line:#DAD3C5;--line2:#EDE8DC;--accent:#7A5E14;--accent-ink:#4F3C0A;--green:#1F6B3A;--amber:#8A5A00;--red:#8C2F22;--bar:#EDE8DC;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg:#141210;--panel:#1C1916;--ink:#EDE8DC;--body:#D3CCBD;--muted:#A39B8C;--line:#3A352E;--line2:#2A2622;--accent:#C9A84C;--accent-ink:#E2C97A;--green:#6FBF8C;--amber:#D9A441;--red:#E07A6B;--bar:#2A2622;}
+}
+:root[data-theme="dark"]{--bg:#141210;--panel:#1C1916;--ink:#EDE8DC;--body:#D3CCBD;--muted:#A39B8C;--line:#3A352E;--line2:#2A2622;--accent:#C9A84C;--accent-ink:#E2C97A;--green:#6FBF8C;--amber:#D9A441;--red:#E07A6B;--bar:#2A2622;}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5}
+a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-ink);text-decoration:underline}
+h1,h2,h3{font-family:'Libre Caslon Text',Georgia,'Times New Roman',serif;font-weight:400;margin:0;line-height:1.2}
+h1{font-size:40px}h2{font-size:28px}h3{font-size:19px}
+.mono{font-family:'IBM Plex Mono','SFMono-Regular',Menlo,Consolas,monospace}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.muted{color:var(--muted)}.body{color:var(--body)}
+.right{text-align:right}
+.green{color:var(--green)}.amber{color:var(--amber)}.red{color:var(--red)}
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+.nav .wrap{height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;color:var(--ink);font-family:'Libre Caslon Text',Georgia,serif;font-size:17px;white-space:nowrap}
+.brand:hover{text-decoration:none}
+.glyph{width:26px;height:26px;border:1.5px solid var(--ink);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:16px;line-height:1}
+.links{display:flex;align-items:center;gap:22px;font-size:14px;font-weight:500}
+.links a{color:var(--ink);padding:4px 0;border-bottom:2px solid transparent}
+.links a.on{border-bottom-color:var(--ink)}
+.links a:hover{text-decoration:none;border-bottom-color:var(--line)}
+.search{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel);border-radius:4px;padding:0 10px;height:36px}
+.search input{border:0;outline:0;background:transparent;color:var(--ink);font:inherit;font-size:13px;width:190px}
+.search input::placeholder{color:var(--muted)}
+.blockpill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--line);border-radius:4px;background:var(--panel);font-size:12px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block}
+.menu-btn{display:none;background:none;border:1px solid var(--line);border-radius:4px;color:var(--ink);height:36px;padding:0 12px;font:inherit;font-size:13px}
+/* layout */
+.page{padding:40px 0 64px}
+.section{margin-bottom:56px}
+.kicker{font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:10px}
+.lede{font-size:18px;line-height:1.55;color:var(--body);max-width:720px}
+.two{display:grid;grid-template-columns:280px minmax(0,1fr);gap:48px}
+.panel{border:1px solid var(--line);background:var(--panel);border-radius:4px}
+.panel-h{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.panel-b{padding:16px 20px}
+.stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border:1px solid var(--line);background:var(--panel);border-radius:4px;overflow:hidden}
+.stat{padding:18px 20px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
+.stat:last-child{border-right:0}
+.stat .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.stat .v{font-family:'IBM Plex Mono',monospace;font-size:20px}
+.stat .s{font-size:12px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{padding:16px 20px;border:1px solid var(--line);border-radius:4px;background:var(--panel);display:flex;flex-direction:column;gap:4px;color:var(--ink)}
+a.card:hover{text-decoration:none;border-color:var(--ink)}
+.card .t{font-weight:500}.card .d{color:var(--muted);font-size:14px}
+.btn{display:inline-flex;align-items:center;height:42px;padding:0 18px;border:1px solid var(--ink);border-radius:4px;color:var(--ink);font-size:14px;font-weight:500;background:transparent;font-family:inherit;cursor:pointer}
+.btn.primary{background:var(--ink);color:var(--bg)}
+.btn:hover{text-decoration:none;opacity:.85}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.tag{font-size:11px;padding:2px 6px;border:1px solid var(--accent);color:var(--accent);border-radius:3px;white-space:nowrap}
+.tag.gray{border-color:var(--muted);color:var(--muted)}.tag.amber{border-color:var(--amber);color:var(--amber)}.tag.green{border-color:var(--green);color:var(--green)}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:500;text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--line2);vertical-align:middle;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.wrap-ok{white-space:normal;min-width:240px}
+.bar{height:8px;background:var(--bar);border-radius:2px;min-width:120px}.bar i{display:block;height:8px;background:var(--ink);border-radius:2px}
+.bar i.acc{background:var(--accent)}
+.rows{display:grid;grid-template-columns:200px minmax(0,1fr);gap:0}
+.rows>div{padding:12px 20px;border-bottom:1px solid var(--line2)}
+.rows>div:nth-last-child(-n+2){border-bottom:0}
+.rows .k{font-weight:500}
+.pager{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-top:12px;gap:12px;flex-wrap:wrap}
+.pager .pb{display:flex;gap:8px}
+.chip{padding:6px 12px;border:1px solid var(--line);border-radius:4px;color:var(--ink);background:var(--panel);font-size:13px}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:hover{text-decoration:none}
+.crumb{font-size:13px;color:var(--muted);display:flex;gap:8px;margin-bottom:16px}
+.crumb a{color:var(--muted)}
+.addrbox{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;background:var(--panel);border:1px solid var(--line);border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:13px;max-width:100%;overflow:hidden}
+.addrbox span{overflow:hidden;text-overflow:ellipsis}
+.copy{background:none;border:1px solid var(--line);border-radius:4px;width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink);cursor:pointer}
+.copy:hover{border-color:var(--ink)}
+.footer{border-top:1px solid var(--line);padding:28px 0 40px;font-size:13px;color:var(--muted)}
+.footer .wrap{display:flex;justify-content:space-between;gap:32px;flex-wrap:wrap}
+.footer a{color:var(--muted)}
+.note{padding:12px 16px;border:1px dashed var(--amber);border-radius:4px;color:var(--amber);font-size:13px;margin-bottom:24px}
+.hero{padding:56px 0 40px}
+.hero h1{font-size:50px;max-width:820px;letter-spacing:-.005em}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.list{display:flex;flex-direction:column;gap:8px}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:14px}
+.status-ok{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-size:13px}
+.empty{padding:40px 20px;text-align:center;color:var(--muted)}
+@media (max-width:1000px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.stat:nth-child(3n){border-right:0}.stat:nth-child(-n+3){border-bottom:1px solid var(--line)}.two{grid-template-columns:1fr;gap:20px}.cards{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}.hero h1{font-size:36px}.links{display:none}.links.open{display:flex;position:absolute;top:64px;left:0;right:0;flex-direction:column;align-items:flex-start;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 24px 16px;gap:12px}.menu-btn{display:inline-flex;align-items:center}.search input{width:120px}.rows{grid-template-columns:1fr}.rows>div{border-bottom:0;padding:6px 20px}.rows>div.k{padding-top:14px}.rows>div:nth-child(even){padding-bottom:14px;border-bottom:1px solid var(--line2)}}
+@media (max-width:600px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat{border-right:0!important;border-bottom:1px solid var(--line)}.stat:nth-child(odd){border-right:1px solid var(--line)!important}.blockpill{display:none}}
+</style>
+</head>
+<body>
+<div class="nav">
+  <div class="wrap">
+    <a class="brand" href="#/"><span class="glyph">к</span>Karma Network</a>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">Menu</button>
+    <div class="links" id="links">
+      <a href="#/protocol" data-nav="protocol">Protocol</a>
+      <a href="#/ledger/blocks" data-nav="ledger">Ledger</a>
+      <a href="#/wallets" data-nav="wallets">Wallets</a>
+      <a href="#/governance" data-nav="governance">Governance</a>
+      <a href="#/runners" data-nav="runners">Runners</a>
+      <a href="#/documents" data-nav="documents">Documents</a>
+      <form class="search" id="searchForm"><label for="q" class="muted" style="font-size:12px">Search</label><input id="q" placeholder="address, block, tx"></form>
+      <a class="blockpill mono" href="#/status" style="color:var(--ink)"><span class="dot"></span><span id="navBlock">Block —</span></a>
+    </div>
+  </div>
+</div>
+<main id="app"></main>
+<div class="footer">
+  <div class="wrap">
+    <div style="max-width:620px;display:flex;flex-direction:column;gap:6px">
+      <div style="font-family:'Libre Caslon Text',Georgia,serif;font-size:15px;color:var(--ink)">Karma Network</div>
+      <div>This site publishes information about the Karma protocol and its ledger. It does not sell, offer or promote any asset, and nothing on it is financial advice. Data is read from the ledger and refreshed every block.</div>
+    </div>
+    <div style="display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap">
+      <a href="#/documents">Contact</a><a href="#/documents">Ledger API</a><a href="#/status">Status</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- constants ---------- */
+const MAX_SUPPLY = 800000000;
+const GENESIS = Date.UTC(2026, 0, 12, 0, 0, 0);
+const BLOCK_MS = 600000;
+const PER_BLOCK = 400;
+const SHARES = { builders: 292, foundation: 48, tech: 32, validators: 28 };
+const HALVING = 210240;
+const height = () => Math.floor((Date.now() - GENESIS) / BLOCK_MS) + 1;
+const blockTime = (n) => GENESIS + (n - 1) * BLOCK_MS;
+const H0 = height();
+
+/* ---------- deterministic rng ---------- */
+function rng(seed){ let a = seed >>> 0; return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+function b58(r, n){ let s=''; for(let i=0;i<n;i++) s += B58[Math.floor(r()*B58.length)]; return s; }
+function hex(r, n){ let s=''; for(let i=0;i<n;i++) s += '0123456789abcdef'[Math.floor(r()*16)]; return s; }
+
+/* ---------- formatting ---------- */
+const fmt = (n) => Math.round(n).toLocaleString('en-US');
+const K = (n) => fmt(n) + ' к';
+const pct = (a, b, d=2) => (100*a/b).toFixed(d) + '%';
+const short = (a) => a.slice(0,8) + '…' + a.slice(-4);
+function dateStr(ms){ const d=new Date(ms); return d.getUTCDate() + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()] + ' ' + d.getUTCFullYear(); }
+function timeStr(ms){ const d=new Date(ms); return dateStr(ms) + ' ' + String(d.getUTCHours()).padStart(2,'0') + ':' + String(d.getUTCMinutes()).padStart(2,'0') + ' UTC'; }
+function ago(ms){ const s=Math.max(0,(Date.now()-ms)/1000); if(s<60) return 'just now'; if(s<3600) return Math.floor(s/60)+' min ago'; if(s<86400) return Math.floor(s/3600)+' h ago'; return Math.floor(s/86400)+' d ago'; }
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- runners ---------- */
+const RUNNERS = [
+  { id:'runner-1', op:'Andrey (protocol team)', city:'Frankfurt', since:1, version:'v1.3.2', independent:false },
+  { id:'runner-2', op:'[Independent operator]', city:'Berlin', since:9120, version:'v1.3.2', independent:true },
+  { id:'runner-3', op:'[Independent operator]', city:'Amsterdam', since:14880, version:'v1.3.1', independent:true },
+  { id:'runner-4', op:'[Independent operator]', city:'Tel Aviv', since:24110, version:'v1.3.2', independent:true },
+];
+
+/* ---------- addresses ---------- */
+const FOUNDATION = '7fQm3AxV9nLkR2pD8sHwE4tYb6cJmZ1oNaQfUgXiKR9v';
+const TECH = 'Bq2vL8TnH5kPwXr3JdZc9mYe7VfGaNtLsQ1uRi4oKz3wPe'.slice(0,44);
+const BRIDGE = 'Hx9dN4VcTq2LmW8pRj5sYb3KeGa7nZfUd1oCiXtvHq7Ym'.slice(0,44);
+const FOUNDATION_SENT = 183376;
+const TECH_SENT = 96420;
+
+const ADDR = [];
+const byAddr = {};
+(function buildAddresses(){
+  const r = rng(7);
+  const issued = PER_BLOCK * H0;
+  const fBal = SHARES.foundation * H0 - FOUNDATION_SENT;
+  const tBal = SHARES.tech * H0 - TECH_SENT;
+  const bridgeBal = 412300;
+  const N = 1205;
+  const weights = [];
+  for (let i=1;i<=N;i++) weights.push(Math.pow(i, -0.85) * (0.75 + r()*0.5));
+  const wsum = weights.reduce((a,b)=>a+b,0);
+  const target = issued - fBal - tBal - bridgeBal;
+  const push = (o) => { ADDR.push(o); byAddr[o.addr] = o; };
+  push({ addr:FOUNDATION, label:'Foundation wallet', kind:'protocol', tag:'multisig 3 of 5', balance:fBal, first:1, received:SHARES.foundation*H0, sent:FOUNDATION_SENT });
+  push({ addr:TECH, label:'Tech Builders wallet', kind:'protocol', tag:'multisig 2 of 3', balance:tBal, first:1, received:SHARES.tech*H0, sent:TECH_SENT });
+  push({ addr:BRIDGE, label:'Bridge vault (wKARMA backing)', kind:'third', tag:'third party', balance:bridgeBal, first:24990, received:bridgeBal+18200, sent:18200 });
+  for (let i=0;i<N;i++){
+    const bal = Math.floor(weights[i]/wsum*target);
+    const roll = r();
+    let label = '', kind = 'user';
+    if (i < 4 && roll < 0.9) { label = 'Runner (self-labelled)'; kind='runner'; }
+    else if (roll < 0.22) { label = 'Kreator (self-labelled)'; kind='kreator'; }
+    const first = 1 + Math.floor(Math.pow(r(),1.6) * (H0-2000));
+    const rr = rng(1000+i);
+    const sent = Math.floor(bal * r() * 0.6);
+    push({ addr:b58(rr,44), label, kind, balance:bal, first, received:bal+sent, sent });
+  }
+  ADDR.sort((a,b)=>b.balance-a.balance);
+  ADDR.forEach((a,i)=>a.rank=i+1);
+})();
+const ISSUED = () => PER_BLOCK * height();
+const holders = () => ADDR.filter(a=>a.balance>0).length;
+
+/* ---------- foundation & tech curated outflows ---------- */
+const CURATED = [
+  { block:37208, from:FOUNDATION, to:ADDR[8].addr, amount:25000, memo:'Grant #8 - festival production, Kreator [name]', signed:'3 of 5', type:'Transfer' },
+  { block:36540, from:FOUNDATION, to:ADDR[14].addr, amount:12400, memo:'Ambassador program Q3 - 6 recipients listed in memo', signed:'4 of 5', type:'Transfer' },
+  { block:34912, from:FOUNDATION, to:ADDR[6].addr, amount:5000, memo:'Fraud response - refund to affected Kreator, case #3', signed:'3 of 5', type:'Transfer' },
+  { block:31980, from:FOUNDATION, to:ADDR[11].addr, amount:18000, memo:'Grant #7 - Berlin scene, embassy setup', signed:'3 of 5', type:'Transfer' },
+  { block:29400, from:FOUNDATION, to:ADDR[21].addr, amount:9600, memo:'Ambassador program Q2 - 5 recipients listed in memo', signed:'3 of 5', type:'Transfer' },
+  { block:26004, from:FOUNDATION, to:BRIDGE, amount:60000, memo:'Liquidity seed to bridge vault - announced blk 24,990, 7-day wait observed', signed:'5 of 5', type:'Transfer' },
+  { block:22750, from:FOUNDATION, to:ADDR[9].addr, amount:15000, memo:'Grant #4 - onboarding book production', signed:'3 of 5', type:'Transfer' },
+  { block:20100, from:FOUNDATION, to:ADDR[17].addr, amount:8000, memo:'Grant #3 - Kreator directory verification work', signed:'3 of 5', type:'Transfer' },
+  { block:37010, from:TECH, to:ADDR[5].addr, amount:14000, memo:'Work item #41 - staking cap implementation (v1.3)', signed:'2 of 3', type:'Transfer' },
+  { block:33200, from:TECH, to:ADDR[5].addr, amount:12500, memo:'Work item #37 - ledger API v2', signed:'2 of 3', type:'Transfer' },
+  { block:30150, from:TECH, to:ADDR[13].addr, amount:9800, memo:'Work item #33 - runner monitoring', signed:'3 of 3', type:'Transfer' },
+  { block:27600, from:TECH, to:ADDR[5].addr, amount:16000, memo:'Work item #29 - wallet SDK', signed:'2 of 3', type:'Transfer' },
+].filter(t=>t.block<=H0);
+const SIGNER_EVENTS = [
+  { block:18400, wallet:FOUNDATION, memo:'Upgrade v1.1 - threshold 2 of 2 → 3 of 5, two independent signers added', signed:'2 of 2' },
+  { block:24110, wallet:TECH, memo:'Upgrade v1.2 - threshold 2 of 2 → 2 of 3, independent runner operator added', signed:'2 of 2' },
+];
+
+/* ---------- transactions ---------- */
+const TX = [];
+const byTx = {};
+(function buildTx(){
+  const r = rng(11);
+  const pool = ADDR.slice(3, 400);
+  let id = 0;
+  const add = (t) => { t.id = hex(rng(5000+id++), 64); TX.push(t); byTx[t.id]=t; };
+  CURATED.forEach(c => add({ ...c }));
+  SIGNER_EVENTS.forEach(s => add({ block:s.block, from:s.wallet, to:'', amount:0, memo:s.memo, signed:s.signed, type:'Signer change' }));
+  const kreators = ADDR.filter(a=>a.kind==='kreator').slice(0,60);
+  let b = H0;
+  for (let i=0;i<900;i++){
+    b -= Math.floor(r()*4);
+    if (b < 2) break;
+    const roll = r();
+    if (roll < 0.45){
+      const k = kreators[Math.floor(r()*kreators.length)];
+      const from = pool[Math.floor(r()*pool.length)];
+      add({ block:b, from:from.addr, to:k.addr, amount:Math.floor(50+Math.pow(r(),2.5)*4000), memo:'', type:'Stake' });
+    } else if (roll < 0.55){
+      const k = kreators[Math.floor(r()*kreators.length)];
+      const from = pool[Math.floor(r()*pool.length)];
+      add({ block:b, from:k.addr, to:from.addr, amount:Math.floor(50+Math.pow(r(),2.5)*2500), memo:'', type:'Unstake' });
+    } else {
+      const a1 = pool[Math.floor(r()*pool.length)], a2 = pool[Math.floor(r()*pool.length)];
+      if (a1===a2) continue;
+      add({ block:b, from:a1.addr, to:a2.addr, amount:Math.floor(10+Math.pow(r(),3)*12000), memo: r()<0.15 ? 'ticket settlement' : '', type:'Transfer' });
+    }
+  }
+  TX.sort((a,b)=>b.block-a.block);
+})();
+const txInBlock = (n) => TX.filter(t=>t.block===n);
+const txForAddr = (a) => TX.filter(t=>t.from===a||t.to===a);
+
+/* ---------- governance ---------- */
+const SIGNERS_F = [
+  { n:1, name:'Roy', role:'Founder, Karma community', key:'Fk2n…9aQe', since:'genesis', ends:'Jan 2027' },
+  { n:2, name:'Andrey', role:'Protocol engineering', key:'Wd7b…3xLp', since:'genesis', ends:'Jan 2027' },
+  { n:3, name:'[Independent signer]', role:'[Name, affiliation, no financial relationship to founders]', key:'Qm4r…7vTn', since:'blk 18,400', ends:'May 2027' },
+  { n:4, name:'[Independent signer]', role:'[Name, affiliation, no financial relationship to founders]', key:'Zs9c…2kHb', since:'blk 18,400', ends:'May 2027' },
+  { n:5, name:'Seat open', role:'Community-elected. Nominations open until [DATE].', key:'-', since:'-', ends:'-', open:true },
+];
+const SIGNERS_T = [
+  { n:1, name:'Andrey', role:'Protocol engineering', key:'Wd7b…3xLp', since:'genesis', ends:'Jan 2027' },
+  { n:2, name:'Roy', role:'Founder, Karma community', key:'Fk2n…9aQe', since:'genesis', ends:'Jan 2027' },
+  { n:3, name:'[Independent runner operator]', role:'Operates runner-4', key:'Tn8v…5hRc', since:'blk 24,110', ends:'Jun 2027' },
+];
+const UPGRADES = [
+  { v:'v1.4', block:null, title:'Reduce Foundation share to 10%; add Runner commitment to collective fund', signed:'0 of 5', status:'Proposed', proposed:'14 Sep 2026', notice:'14-day notice period starts on first signature', text:['Foundation share of per-block issuance goes from 12% to 10%. The 2% moves to the Builders pool.','Each Runner commits 20% of validator rewards to a collective fund for brand, awareness, grants and fraud response. The fund is a multisig outside the protocol; the protocol does not know about it.','Requires 3 of 5 Foundation signatures and adoption by all 4 runners. No rule changes until both conditions are met.'] },
+  { v:'v1.3', block:31200, title:'Staker cap: a single address counts once in unique_stakers', signed:'4 of 5', status:'Active', proposed:'2 Jul 2026', text:['Closes the split-address exploit: the same key staking from several sub-addresses no longer inflates log₂(unique stakers + 1).','No change to supply, block time or shares.'] },
+  { v:'v1.2', block:24110, title:'Tech Builders wallet moved to 2-of-3 multisig; third signer added', signed:'3 of 5', status:'Active', proposed:'20 Jun 2026', text:['Third signer: independent operator of runner-4.','Spending policy published: payment only against listed work items.'] },
+  { v:'v1.1', block:18400, title:'Foundation wallet moved from 2-of-2 to 3-of-5 multisig; two independent signers added', signed:'2 of 2', status:'Active', proposed:'2 May 2026', text:['Two independent signers with no financial relationship to the founders.','Transfers above 50,000 к wait 7 days after public announcement.'] },
+  { v:'v1.0', block:1, title:'Genesis rules: 800M supply, 10-minute blocks, four-pool distribution', signed:'2 of 2', status:'Active', proposed:'12 Jan 2026', text:['Maximum supply 800,000,000 к, fixed.','Per-block issuance 400 к, halving every 210,240 blocks.','Distribution: Builders 73%, Foundation 12%, Tech Builders 8%, Validators 7%.'] },
+];
+const PENDING = { announced:'16 Sep 2026', amount:40000, to:ADDR[3].addr, purpose:'Grant #9 - Berlin embassy', signed:'1 of 3', signer:'signer 2' };
+
+/* ---------- components ---------- */
+const NOTE = '<div class="note">Simulation with generated dummy data. Numbers, addresses and dates are illustrative; bracketed text marks decisions still open.</div>';
+function stats(){
+  const H = height(), issued = ISSUED();
+  return `<div class="stats">
+    <div class="stat"><div class="l">Block height</div><div class="v">${fmt(H)}</div><div class="s">last block ${ago(blockTime(H))}</div></div>
+    <div class="stat"><div class="l">Issued</div><div class="v">${K(issued)}</div><div class="s">${pct(issued,MAX_SUPPLY)} of max supply</div></div>
+    <div class="stat"><div class="l">Max supply</div><div class="v">${K(MAX_SUPPLY)}</div><div class="s">fixed, no minting</div></div>
+    <div class="stat"><div class="l">Holding addresses</div><div class="v">${fmt(holders())}</div><div class="s">balance above 0</div></div>
+    <div class="stat"><div class="l">Protocol runners</div><div class="v">${RUNNERS.length}</div><div class="s">${RUNNERS.filter(r=>r.independent).length} independent operators</div></div>
+    <div class="stat"><div class="l">Genesis</div><div class="v">${dateStr(GENESIS)}</div><div class="s">uptime 99.94%</div></div>
+  </div>`;
+}
+function addrLink(a, full){
+  const o = byAddr[a];
+  const label = o && o.label ? ` <span class="muted" style="font-size:12px">${esc(o.label)}</span>` : '';
+  return `<a class="mono" href="#/address/${a}">${full?a:short(a)}</a>${label}`;
+}
+function holdersTable(list, issued){
+  return `<div class="tw"><table><thead><tr><th>#</th><th>Address</th><th>Label</th><th class="right">Balance</th><th class="right">of issued</th><th class="right">of max</th></tr></thead><tbody>
+  ${list.map(a=>`<tr><td class="muted">${a.rank}</td><td><a class="mono" href="#/address/${a.addr}">${short(a.addr)}</a></td><td>${a.label?esc(a.label):'<span class="muted">-</span>'}${a.tag?` <span class="tag${a.kind==='third'?' gray':''}">${a.tag}</span>`:''}</td><td class="right mono">${K(a.balance)}</td><td class="right mono">${pct(a.balance,issued)}</td><td class="right mono">${pct(a.balance,MAX_SUPPLY,3)}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+function txTable(list, opts={}){
+  if(!list.length) return '<div class="empty">No transactions.</div>';
+  return `<div class="tw"><table><thead><tr><th>Tx</th><th>Block</th><th>Time</th><th>Type</th><th>From</th><th>To</th><th class="right">Amount</th>${opts.memo?'<th>Memo</th>':''}</tr></thead><tbody>
+  ${list.map(t=>`<tr><td><a class="mono" href="#/tx/${t.id}">${t.id.slice(0,10)}…</a></td><td><a class="mono" href="#/block/${t.block}">${fmt(t.block)}</a></td><td class="mono muted">${ago(blockTime(t.block))}</td><td>${t.type}</td><td>${t.from?addrLink(t.from):'<span class="muted">protocol</span>'}</td><td>${t.to?addrLink(t.to):'<span class="muted">-</span>'}</td><td class="right mono">${t.amount?K(t.amount):'-'}</td>${opts.memo?`<td class="wrap-ok">${esc(t.memo||'')}${t.signed?` <span class="muted mono" style="font-size:12px">${t.signed}</span>`:''}</td>`:''}</tr>`).join('')}
+  </tbody></table></div>`;
+}
+function pager(base, page, total, per){
+  const pages = Math.max(1, Math.ceil(total/per));
+  return `<div class="pager"><div>Showing ${fmt(Math.min(per,total-(page-1)*per))} of ${fmt(total)} · page ${page} of ${pages}</div><div class="pb">${page>1?`<a class="chip" href="${base}?p=${page-1}">Newer</a>`:''}${page<pages?`<a class="chip" href="${base}?p=${page+1}">Older</a>`:''}</div></div>`;
+}
+function tabs(items, on){ return `<div style="display:flex;gap:8px;flex-wrap:wrap">${items.map(i=>`<a class="chip${i.id===on?' on':''}" href="${i.href}">${i.label}</a>`).join('')}</div>`; }
+function signersTable(list, req){
+  return `<div class="tw"><table><thead><tr><th>#</th><th>Signer</th><th>Public key</th><th>Since</th><th>Term ends</th></tr></thead><tbody>
+  ${list.map(s=>`<tr><td class="mono muted">${s.n}</td><td class="wrap-ok"><div${s.open?' class="amber"':''}>${esc(s.name)}</div><div class="muted" style="font-size:12px">${esc(s.role)}</div></td><td class="mono">${s.key}</td><td class="mono muted">${s.since}</td><td class="mono muted">${s.ends}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+
+/* ---------- pages ---------- */
+const P = {};
+P.home = () => {
+  const issued = ISSUED();
+  const top = ADDR.slice(0,8);
+  const prot = ADDR[0].balance + ADDR[1].balance;
+  const top10 = ADDR.slice(0,10).reduce((s,a)=>s+a.balance,0);
+  return `<div class="wrap page">${NOTE}
+  <div class="hero"><h1>A rule-based ledger that issues and distributes Karma.</h1>
+  <p class="lede" style="margin:24px 0">Karma (к) is created by a fixed protocol, not by a company. Every rule, every wallet the protocol controls, and every change to the rules is published here. This site sells nothing.</p>
+  <div class="btns"><a class="btn primary" href="#/protocol">Read the rules</a><a class="btn" href="#/ledger/blocks">Open the ledger</a></div></div>
+  <div class="section">${stats()}</div>
+
+  <div class="section two"><div><div class="kicker">01 - The rules</div><h2>What the protocol does, and nothing else</h2><p class="body">The protocol has one job: issue Karma on a fixed schedule and distribute it according to published rules. It does not run a wallet, an exchange, or a marketplace.</p><p><a href="#/protocol">Full rules →</a></p></div>
+  <div class="panel rows">
+    <div class="k">Maximum supply</div><div class="mono">800,000,000 к. Fixed at genesis. No function in the protocol can create more.</div>
+    <div class="k">Block time</div><div class="mono">10 minutes</div>
+    <div class="k">Issuance</div><div class="mono">${PER_BLOCK} к per block, halving every ${fmt(HALVING)} blocks (about 4 years).</div>
+    <div class="k">Distribution per block</div><div>${shareBars()}</div>
+    <div class="k">Changing the rules</div><div class="mono">Only by a versioned protocol upgrade, signed by the required signers and adopted by runners. <a href="#/governance">Every change is logged.</a></div>
+  </div></div>
+
+  <div class="section"><div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:20px"><div style="max-width:720px"><div class="kicker">02 - The ledger</div><h2>Who holds Karma</h2><p class="body" style="margin:10px 0 0">Every balance on the ledger, ranked. Protocol-controlled wallets are labelled. Everything else is a pseudonymous address; labels appear only where the owner has published one.</p></div><a href="#/ledger/addresses" style="font-weight:500;white-space:nowrap">All ${fmt(holders())} addresses →</a></div>
+  <div class="panel">${holdersTable(top, issued)}</div>
+  <div class="cards" style="margin-top:16px">
+    <div class="card"><div class="d" style="text-transform:uppercase;letter-spacing:.06em;font-size:11px">Protocol-controlled</div><div class="mono" style="font-size:18px">${pct(prot,issued)}</div><div class="d">of issued supply, in two multisig wallets</div></div>
+    <div class="card"><div class="d" style="text-transform:uppercase;letter-spacing:.06em;font-size:11px">Top 10 addresses</div><div class="mono" style="font-size:18px">${pct(top10,issued,1)}</div><div class="d">of issued supply</div></div>
+    <div class="card"><div class="d" style="text-transform:uppercase;letter-spacing:.06em;font-size:11px">Pre-mine</div><div class="mono" style="font-size:18px">0 к</div><div class="d">no allocation existed before block 1</div></div>
+  </div></div>
+
+  <div class="section"><div style="max-width:720px;margin-bottom:20px"><div class="kicker">03 - Control</div><h2>Who controls what</h2><p class="body" style="margin:10px 0 0">Two wallets receive protocol issuance and are controlled by named signers. No single person can move funds from either. Signers, thresholds and spending policies are published and every outgoing transaction is on the ledger.</p></div>
+  <div class="grid2">${walletCard(ADDR[0], SIGNERS_F, '3 of 5 signatures', 'brand, awareness, grants to Kreators, fraud response.', 'any transfer above 50,000 к is announced 7 days before signing.')}${walletCard(ADDR[1], SIGNERS_T, '2 of 3 signatures', 'pays people who build and maintain the protocol software.', 'paid against published work items; recipients listed per transaction.')}</div>
+  <div class="grid2" style="margin-top:20px">
+    <div class="card"><div class="t">Protocol runners</div><div class="body" style="font-size:14px">${RUNNERS.length} nodes produce blocks and validate transactions. ${RUNNERS.filter(r=>r.independent).length} are run by operators unrelated to the founders. Any runner can be replaced; no runner can change the rules alone.</div><a href="#/runners">Runner list and how to run one →</a></div>
+    <div class="card"><div class="t">Legal status</div><div class="body" style="font-size:14px">As of September 2026, no company owns or operates the protocol. The two wallets above are multisignature addresses, not legal entities. Formation of a foundation entity is under evaluation; this line will be updated when it changes.</div></div>
+  </div></div>
+
+  <div class="section two"><div><div class="kicker">04 - Governance</div><h2>How the rules change</h2><p class="body">Changes are proposed in writing, versioned, signed by the Foundation wallet signers and adopted by runners. Signers are elected by holders and can be recalled. There is no token-weighted voting on rules.</p><p><a href="#/governance">Governance →</a></p></div>
+  <div class="panel">${upgradeTable(UPGRADES)}</div></div>
+
+  <div class="section"><div style="max-width:720px;margin-bottom:20px"><div class="kicker">05 - Built on the ledger</div><h2>What Karma Network is not</h2><p class="body" style="margin:10px 0 0">Products that use the ledger are built and operated by others. The network does not run, own, endorse or guarantee any of them. If one fails, the ledger does not.</p></div>
+  <div class="panel tw"><table><thead><tr><th>Service</th><th>What it does</th><th>Operator</th><th>Relationship</th></tr></thead><tbody>
+  <tr><td style="font-weight:500">Karma Terminal</td><td class="wrap-ok body">Wallet. Holds keys, sends and stakes к.</td><td>[Operator entity]</td><td class="muted">Independent</td></tr>
+  <tr><td style="font-weight:500">Karma Exchange</td><td class="wrap-ok body">Trades к against USDC via a bridge to Ethereum.</td><td>[Operator entity]</td><td class="muted">Independent</td></tr>
+  <tr><td style="font-weight:500">Anyone else</td><td class="wrap-ok body">The ledger is open. Any wallet or service can read and write to it under the same rules.</td><td class="muted">-</td><td class="muted">No permission needed</td></tr>
+  </tbody></table></div></div>
+
+  <div class="section two"><div><div class="kicker">06 - Documents</div><h2>Read the source</h2><p class="body">Everything above can be checked against the specification, the code and the ledger itself.</p></div>${docCards()}</div>
+  </div>`;
+};
+function shareBars(){
+  const rows = [['Builders (Kreators + Stakers)',73,''],['Foundation',12,'acc'],['Tech Builders',8,'acc'],['Validators (Runners)',7,'']];
+  return `<div class="list">${rows.map(r=>`<div style="display:grid;grid-template-columns:minmax(120px,190px) 44px minmax(0,1fr);gap:12px;align-items:center" class="mono"><div style="font-size:13px">${r[0]}</div><div>${r[1]}%</div><div class="bar"><i class="${r[2]}" style="width:${r[1]}%"></i></div></div>`).join('')}</div>`;
+}
+function walletCard(w, signers, thr, purpose, policy){
+  return `<div class="panel" style="display:flex;flex-direction:column"><div class="panel-h"><div><h3>${esc(w.label)}</h3><div class="mono muted" style="font-size:12px">${short(w.addr)} · receives ${w.addr===FOUNDATION?'12%':'8%'} of issuance</div></div><span class="tag">${thr}</span></div>
+  <div class="panel-b list" style="font-size:14px">${signers.map(s=>`<div style="display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:10px"><span class="mono muted">${s.n}</span><span${s.open?' class="amber"':''}>${esc(s.name)}${s.open?'':' - '+esc(s.role)}</span><span class="mono muted" style="font-size:12px">${s.open?'seat open':s.since}</span></div>`).join('')}</div>
+  <div class="panel-b" style="border-top:1px solid var(--line);font-size:14px;display:flex;flex-direction:column;gap:6px"><div><b style="font-weight:500">Purpose:</b> ${purpose}</div><div><b style="font-weight:500">Policy:</b> ${policy}</div><a href="#/address/${w.addr}" style="font-weight:500">Wallet page: balance, signers, every transaction →</a></div></div>`;
+}
+function upgradeTable(list){
+  return `<div class="tw"><table><thead><tr><th>Version</th><th>Adopted</th><th>Change</th><th>Signed</th><th>Status</th></tr></thead><tbody>
+  ${list.map(u=>`<tr><td><a class="mono" href="#/governance/${u.v}">${u.v}</a></td><td class="mono muted">${u.block?'blk '+fmt(u.block):'-'}</td><td class="wrap-ok">${esc(u.title)}</td><td class="mono muted">${u.signed}</td><td class="${u.status==='Active'?'green':'amber'}">${u.status}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+function docCards(){
+  const d = [['Protocol specification v1.3','Issuance schedule, distribution, reward formula, signature scheme','#/protocol'],['Source code','Protocol node, open repository, release tags per version','#/documents'],['Whitepaper','Why the protocol exists and what it rewards','#/documents'],['Governance framework','Elections, recall, upgrade process, signer duties','#/governance'],['Run a node','Requirements, setup, current runner list','#/runners']];
+  return `<div class="grid2">${d.map(x=>`<a class="card" href="${x[2]}"><div class="t">${x[0]}</div><div class="d">${x[1]}</div></a>`).join('')}<div class="card"><div class="t" style="display:flex;gap:8px;align-items:center">Security audit <span class="tag amber">not yet</span></div><div class="d">No third-party audit has been completed. Status here will change when one is commissioned.</div></div></div>`;
+}
+
+P.protocol = () => {
+  const H = height();
+  const nextHalving = HALVING - (H % HALVING);
+  return `<div class="wrap page">${NOTE}<div class="crumb"><a href="#/">Home</a><span>/</span><span>Protocol</span></div>
+  <div class="kicker">Protocol specification v1.3</div><h1>The rules</h1><p class="lede" style="margin:16px 0 32px">Everything the protocol enforces, in one page. Where a number can change, the page says how.</p>
+  <div class="two"><div><h3 style="margin-bottom:8px">Supply</h3><p class="body" style="font-size:14px">Issuance is the only way Karma comes into existence. Emitted per block, split by fixed shares.</p></div>
+  <div class="panel rows">
+    <div class="k">Maximum supply</div><div class="mono">800,000,000 к</div>
+    <div class="k">Issued to date</div><div class="mono">${K(ISSUED())} (${pct(ISSUED(),MAX_SUPPLY)})</div>
+    <div class="k">Block time</div><div class="mono">10 minutes · target, enforced by runner consensus</div>
+    <div class="k">Issuance per block</div><div class="mono">${PER_BLOCK} к · current epoch</div>
+    <div class="k">Halving</div><div class="mono">every ${fmt(HALVING)} blocks · next in ${fmt(nextHalving)} blocks (about ${(nextHalving*10/60/24/365).toFixed(1)} years)</div>
+    <div class="k">Pre-mine</div><div class="mono">none · block 1 is the first issuance</div>
+  </div></div>
+  <div class="two" style="margin-top:40px"><div><h3 style="margin-bottom:8px">Distribution</h3><p class="body" style="font-size:14px">Each block's ${PER_BLOCK} к is split the same way every time. The two wallet shares go to multisig addresses whose signers are published.</p></div>
+  <div class="panel rows">
+    <div class="k">Shares</div><div>${shareBars()}</div>
+    <div class="k">Builders (${SHARES.builders} к/block)</div><div class="mono">Distributed to staked Kreators and their stakers by the reward rule below. Nothing accumulates in a wallet.</div>
+    <div class="k">Foundation (${SHARES.foundation} к/block)</div><div class="mono">To <a href="#/address/${FOUNDATION}">${short(FOUNDATION)}</a>, multisig 3 of 5.</div>
+    <div class="k">Tech Builders (${SHARES.tech} к/block)</div><div class="mono">To <a href="#/address/${TECH}">${short(TECH)}</a>, multisig 2 of 3.</div>
+    <div class="k">Validators (${SHARES.validators} к/block)</div><div class="mono">To the runner that produced the block. <a href="#/runners">Runner list.</a></div>
+  </div></div>
+  <div class="two" style="margin-top:40px"><div><h3 style="margin-bottom:8px">Builder reward rule</h3><p class="body" style="font-size:14px">Rewards favour many independent stakers over one large one.</p></div>
+  <div class="panel rows">
+    <div class="k">Weight per Kreator</div><div class="mono">weight = √(total stake) × log₂(unique stakers + 1)</div>
+    <div class="k">Share of Builders pool</div><div class="mono">weight ÷ sum of all weights, per block</div>
+    <div class="k">Split</div><div class="mono">50% to the Kreator, 50% to stakers pro rata</div>
+    <div class="k">Unique stakers</div><div class="mono">one address counts once (v1.3)</div>
+    <div class="k">Unstake</div><div class="mono">immediate, no lock, no penalty</div>
+  </div></div>
+  <div class="two" style="margin-top:40px"><div><h3 style="margin-bottom:8px">Accounts and signatures</h3></div>
+  <div class="panel rows">
+    <div class="k">Signature scheme</div><div class="mono">ED25519</div>
+    <div class="k">Address</div><div class="mono">base58 of the public key, 44 characters</div>
+    <div class="k">Freezing, reversal</div><div class="mono">not possible. No function in the protocol can freeze, seize or reassign a balance.</div>
+    <div class="k">Multisig</div><div class="mono">native; threshold and signer set are on-ledger and public</div>
+  </div></div>
+  <div class="two" style="margin-top:40px"><div><h3 style="margin-bottom:8px">Changing the rules</h3></div>
+  <div class="panel rows">
+    <div class="k">Who</div><div class="mono">Foundation wallet signers propose and sign; all runners must adopt</div>
+    <div class="k">Notice</div><div class="mono">14 days minimum between first signature and activation</div>
+    <div class="k">Record</div><div class="mono"><a href="#/governance">versioned change log</a>, block number of activation, signature count</div>
+  </div></div>
+  </div>`;
+};
+
+P.blocks = (q) => {
+  const H = height(), per = 25, page = +(q.p||1);
+  const start = H - (page-1)*per;
+  const rows = [];
+  for (let n=start; n>Math.max(0,start-per); n--) rows.push(n);
+  return `<div class="wrap page">${NOTE}<div class="kicker">Ledger</div><h1>Blocks</h1><div style="margin:16px 0 20px">${tabs([{id:'blocks',href:'#/ledger/blocks',label:'Blocks'},{id:'tx',href:'#/ledger/transactions',label:'Transactions'},{id:'addr',href:'#/ledger/addresses',label:'Addresses'}],'blocks')}</div>
+  <div class="panel tw"><table><thead><tr><th>Block</th><th>Time</th><th>Runner</th><th class="right">Txs</th><th class="right">Issued</th><th>Distribution</th></tr></thead><tbody>
+  ${rows.map(n=>`<tr><td><a class="mono" href="#/block/${n}">${fmt(n)}</a></td><td class="mono muted">${ago(blockTime(n))}</td><td><a href="#/runners">${RUNNERS[(n-1)%4].id}</a></td><td class="right mono">${txInBlock(n).length}</td><td class="right mono">${K(PER_BLOCK)}</td><td class="mono muted" style="font-size:12px">292 builders · 48 foundation · 32 tech · 28 validators</td></tr>`).join('')}
+  </tbody></table></div>${pager('#/ledger/blocks', page, H, per)}</div>`;
+};
+P.transactions = (q) => {
+  const per = 40, page = +(q.p||1), type = q.type||'all';
+  const list = TX.filter(t=>type==='all'||t.type===type);
+  const slice = list.slice((page-1)*per, page*per);
+  const T = (id,l)=>({id,href:'#/ledger/transactions'+(id==='all'?'':'?type='+id),label:l});
+  return `<div class="wrap page">${NOTE}<div class="kicker">Ledger</div><h1>Transactions</h1><div style="margin:16px 0 20px">${tabs([{id:'blocks',href:'#/ledger/blocks',label:'Blocks'},{id:'tx',href:'#/ledger/transactions',label:'Transactions'},{id:'addr',href:'#/ledger/addresses',label:'Addresses'}],'tx')}</div>
+  <div style="margin-bottom:12px">${tabs([T('all','All'),T('Transfer','Transfers'),T('Stake','Stakes'),T('Unstake','Unstakes'),T('Signer change','Signer changes')],type)}</div>
+  <div class="panel">${txTable(slice,{memo:true})}</div>${pager('#/ledger/transactions'+(type==='all'?'':'?type='+type+'&'), page, list.length, per)}</div>`;
+};
+P.addresses = (q) => {
+  const per = 50, page = +(q.p||1), issued = ISSUED();
+  const list = ADDR.filter(a=>a.balance>0);
+  return `<div class="wrap page">${NOTE}<div class="kicker">Ledger</div><h1>Addresses</h1><div style="margin:16px 0 20px">${tabs([{id:'blocks',href:'#/ledger/blocks',label:'Blocks'},{id:'tx',href:'#/ledger/transactions',label:'Transactions'},{id:'addr',href:'#/ledger/addresses',label:'Addresses'}],'addr')}</div>
+  <div class="panel">${holdersTable(list.slice((page-1)*per,page*per), issued)}</div>${pager('#/ledger/addresses', page, list.length, per)}</div>`;
+};
+P.wallets = () => {
+  const issued = ISSUED();
+  return `<div class="wrap page">${NOTE}<div class="kicker">Wallets</div><h1>Protocol-controlled wallets</h1><p class="lede" style="margin:16px 0 32px">Two addresses receive issuance and are controlled by named signers. Both are ordinary multisig addresses on the ledger; nothing about them is special to the protocol beyond receiving a share.</p>
+  <div class="grid2">${walletCard(ADDR[0], SIGNERS_F, '3 of 5 signatures', 'brand, awareness, grants to Kreators, fraud response.', 'any transfer above 50,000 к is announced 7 days before signing.')}${walletCard(ADDR[1], SIGNERS_T, '2 of 3 signatures', 'pays people who build and maintain the protocol software.', 'paid against published work items; recipients listed per transaction.')}</div>
+  <div class="cards" style="margin-top:20px">
+    <div class="card"><div class="d" style="text-transform:uppercase;letter-spacing:.06em;font-size:11px">Combined balance</div><div class="mono" style="font-size:18px">${K(ADDR[0].balance+ADDR[1].balance)}</div><div class="d">${pct(ADDR[0].balance+ADDR[1].balance,issued)} of issued</div></div>
+    <div class="card"><div class="d" style="text-transform:uppercase;letter-spacing:.06em;font-size:11px">Combined outflow</div><div class="mono" style="font-size:18px">${K(ADDR[0].sent+ADDR[1].sent)}</div><div class="d">${CURATED.length} outgoing transactions, all with public memos</div></div>
+    <div class="card"><div class="d" style="text-transform:uppercase;letter-spacing:.06em;font-size:11px">Pending</div><div class="mono amber" style="font-size:18px">1</div><div class="d">${K(PENDING.amount)} · ${PENDING.signed} signatures</div></div>
+  </div>
+  <div class="section" style="margin-top:48px"><h2 style="margin-bottom:16px">Third-party wallets with a published label</h2><div class="panel">${holdersTable([ADDR[2]], issued)}</div><p class="muted" style="font-size:13px;margin-top:10px">Any address owner can publish a label by signing a message with the address key. Labels are never assigned by the network.</p></div>
+  </div>`;
+};
+P.address = (a) => {
+  const o = byAddr[a];
+  if(!o) return `<div class="wrap page"><div class="crumb"><a href="#/ledger/addresses">Addresses</a><span>/</span><span>Not found</span></div><h1>Address not found</h1><p class="body" style="margin-top:12px">No address <span class="mono">${esc(a)}</span> has appeared on the ledger.</p></div>`;
+  const issued = ISSUED();
+  const isF = a===FOUNDATION, isT = a===TECH, prot = isF||isT;
+  const txs = txForAddr(a);
+  const issuanceRows = prot ? [{ id:'issuance-'+height(), block:height(), from:'', to:a, amount:isF?SHARES.foundation:SHARES.tech, type:'Issuance', memo:'Block reward, '+(isF?'Foundation':'Tech Builders')+' share' }, { id:'issuance-'+(height()-1), block:height()-1, from:'', to:a, amount:isF?SHARES.foundation:SHARES.tech, type:'Issuance', memo:'Block reward' }] : [];
+  const all = [...issuanceRows, ...txs].sort((x,y)=>y.block-x.block);
+  return `<div class="wrap page">${NOTE}<div class="crumb"><a href="#/ledger/addresses">Addresses</a><span>/</span><span>${o.label?esc(o.label):short(a)}</span></div>
+  <div style="display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:flex-start;margin-bottom:24px"><div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1 style="font-size:34px">${o.label?esc(o.label):'Address'}</h1>${prot?'<span class="tag">protocol-controlled</span>':''}${o.tag?`<span class="tag${o.kind==='third'?' gray':''}">${o.tag}</span>`:''}${o.kind==='kreator'?'<span class="tag gray">Kreator</span>':''}</div>
+    <div style="display:flex;align-items:center;gap:8px;max-width:100%"><div class="addrbox"><span>${a}</span></div><button class="copy" aria-label="Copy address" data-copy="${a}"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="9" height="9" rx="1"></rect><path d="M11 5V3a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h2"></path></svg></button></div>
+    ${isF?'<div class="body" style="font-size:14px;max-width:720px">Receives 12% of every block\'s issuance. Funds brand, awareness, grants to Kreators and fraud response. Nothing leaves this wallet without 3 of the 5 signatures below.</div>':''}
+    ${isT?'<div class="body" style="font-size:14px;max-width:720px">Receives 8% of every block\'s issuance. Pays people who build and maintain the protocol software, against published work items.</div>':''}
+    ${o.kind==='third'?'<div class="body" style="font-size:14px;max-width:720px">Holds к backing wKARMA on Ethereum. Operated by a third party; the network does not control this address.</div>':''}
+  </div><div class="btns"><a class="btn" href="#/documents">Export CSV</a><a class="btn" href="#/documents">API</a></div></div>
+  <div class="stats" style="grid-template-columns:repeat(${prot?5:4},minmax(0,1fr))">
+    <div class="stat"><div class="l">Balance</div><div class="v">${K(o.balance)}</div><div class="s">${pct(o.balance,issued)} of issued · ${pct(o.balance,MAX_SUPPLY,3)} of max</div></div>
+    <div class="stat"><div class="l">${prot?'Received from issuance':'Received'}</div><div class="v">${K(o.received)}</div><div class="s">${prot?(isF?SHARES.foundation:SHARES.tech)+' к per block since block 1':'first seen block '+fmt(o.first)}</div></div>
+    <div class="stat"><div class="l">Sent</div><div class="v">${K(o.sent)}</div><div class="s">${o.received?pct(o.sent,o.received,1)+' of received':'-'}</div></div>
+    <div class="stat"><div class="l">Transactions</div><div class="v">${fmt(txs.length + (prot?height():0))}</div><div class="s">${prot?'including one issuance credit per block':'transfers and stakes'}</div></div>
+    ${prot?`<div class="stat"><div class="l">Pending</div><div class="v amber">${isF?1:0}</div><div class="s">${isF?K(PENDING.amount)+' · '+PENDING.signed+' signatures':'none'}</div></div>`:''}
+  </div>
+  ${prot?`<div style="display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:20px;margin-top:20px" class="walletgrid">
+    <div class="panel"><div class="panel-h"><h3>Signers</h3><span class="muted" style="font-size:12px">${isF?'3 of 5 required · terms 12 months · recall by holder vote':'2 of 3 required · terms 12 months'}</span></div>${signersTable(isF?SIGNERS_F:SIGNERS_T)}</div>
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <div class="panel"><div class="panel-h"><h3>Spending policy</h3></div><div class="panel-b list body" style="font-size:14px">${(isF?['Any transfer is announced with amount, recipient and purpose before the first signature.','Transfers above 50,000 к wait 7 days after announcement.','No transfer to a signer\'s own address or a related party.','Every transaction carries a public memo. Recipients are named where they have consented.']:['Payment only against a work item listed in the public backlog.','Recipient named in the memo.','No payment to a signer without the other two signatures.']).map((t,i)=>`<div style="display:flex;gap:12px"><span class="mono muted" style="width:16px">${i+1}</span><span>${t}</span></div>`).join('')}</div></div>
+      ${isF?`<div class="panel" style="background:transparent"><div class="panel-h"><h3>Pending</h3><span class="amber" style="font-size:12px">announced ${PENDING.announced}</span></div><div class="panel-b list"><div class="kv"><span class="muted">Amount</span><span class="mono">${K(PENDING.amount)}</span></div><div class="kv"><span class="muted">To</span>${addrLink(PENDING.to)}</div><div class="kv"><span class="muted">Purpose</span><span style="text-align:right">${PENDING.purpose}</span></div><div class="kv"><span class="muted">Signatures</span><span class="mono">${PENDING.signed} · ${PENDING.signer}</span></div></div></div>`:''}
+    </div></div>`:''}
+  <div class="section" style="margin-top:40px"><div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:12px"><h2>Transactions</h2>${prot?'<span class="muted" style="font-size:13px">issuance credits collapse to one row per block · showing the latest 2</span>':''}</div><div class="panel">${txTable(all,{memo:true})}</div></div>
+  </div><style>@media (max-width:1000px){.walletgrid{grid-template-columns:1fr!important}}</style>`;
+};
+P.block = (n) => {
+  n = +n; const H = height();
+  if(!(n>=1 && n<=H)) return `<div class="wrap page"><h1>Block not found</h1><p class="body" style="margin-top:12px">The ledger is at block ${fmt(H)}.</p></div>`;
+  const txs = txInBlock(n), r = RUNNERS[(n-1)%4], rr = rng(n);
+  return `<div class="wrap page">${NOTE}<div class="crumb"><a href="#/ledger/blocks">Blocks</a><span>/</span><span>${fmt(n)}</span></div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:24px"><h1>Block ${fmt(n)}</h1><div class="btns">${n>1?`<a class="chip" href="#/block/${n-1}">← ${fmt(n-1)}</a>`:''}${n<H?`<a class="chip" href="#/block/${n+1}">${fmt(n+1)} →</a>`:''}</div></div>
+  <div class="panel rows">
+    <div class="k">Time</div><div class="mono">${timeStr(blockTime(n))} · ${ago(blockTime(n))}</div>
+    <div class="k">Produced by</div><div class="mono"><a href="#/runners">${r.id}</a> · ${esc(r.op)}, ${r.city}</div>
+    <div class="k">Hash</div><div class="mono" style="word-break:break-all;white-space:normal">${hex(rr,64)}</div>
+    <div class="k">Transactions</div><div class="mono">${txs.length}</div>
+    <div class="k">Issued</div><div class="mono">${K(PER_BLOCK)}</div>
+    <div class="k">Distribution</div><div class="mono" style="white-space:normal">292 к Builders pool (to staked Kreators and stakers) · 48 к <a href="#/address/${FOUNDATION}">Foundation</a> · 32 к <a href="#/address/${TECH}">Tech Builders</a> · 28 к ${r.id}</div>
+    <div class="k">Protocol version</div><div class="mono">${n>=31200?'v1.3':n>=24110?'v1.2':n>=18400?'v1.1':'v1.0'}</div>
+  </div>
+  <div class="section" style="margin-top:40px"><h2 style="margin-bottom:12px">Transactions in this block</h2><div class="panel">${txTable(txs,{memo:true})}</div></div></div>`;
+};
+P.tx = (id) => {
+  const t = byTx[id];
+  if(!t) return `<div class="wrap page"><h1>Transaction not found</h1></div>`;
+  return `<div class="wrap page">${NOTE}<div class="crumb"><a href="#/ledger/transactions">Transactions</a><span>/</span><span class="mono">${id.slice(0,10)}…</span></div>
+  <h1 style="margin-bottom:24px">Transaction</h1>
+  <div class="panel rows">
+    <div class="k">Id</div><div class="mono" style="word-break:break-all;white-space:normal">${id}</div>
+    <div class="k">Status</div><div class="green">Confirmed · ${fmt(height()-t.block+1)} confirmations</div>
+    <div class="k">Block</div><div><a class="mono" href="#/block/${t.block}">${fmt(t.block)}</a> <span class="muted mono">· ${timeStr(blockTime(t.block))}</span></div>
+    <div class="k">Type</div><div>${t.type}</div>
+    <div class="k">From</div><div>${t.from?addrLink(t.from,true):'<span class="muted">protocol issuance</span>'}</div>
+    <div class="k">To</div><div>${t.to?addrLink(t.to,true):'<span class="muted">-</span>'}</div>
+    <div class="k">Amount</div><div class="mono">${t.amount?K(t.amount):'-'}</div>
+    <div class="k">Memo</div><div style="white-space:normal">${t.memo?esc(t.memo):'<span class="muted">none</span>'}</div>
+    ${t.signed?`<div class="k">Signatures</div><div class="mono">${t.signed}</div>`:''}
+    <div class="k">Fee</div><div class="mono">0 к · the protocol has no transaction fee</div>
+  </div></div>`;
+};
+P.governance = () => `<div class="wrap page">${NOTE}<div class="kicker">Governance</div><h1>How the rules change</h1><p class="lede" style="margin:16px 0 32px">Changes are proposed in writing, versioned, signed by the Foundation wallet signers and adopted by runners. Signers are elected by holders and can be recalled. There is no token-weighted voting on rules.</p>
+  <div class="two"><div class="panel" style="align-self:start"><div class="panel-h"><h3>Terms</h3></div><div class="panel-b list"><div class="kv"><span class="muted">Signer term</span><span class="mono">12 months</span></div><div class="kv"><span class="muted">Recall</span><span class="mono">by holder vote</span></div><div class="kv"><span class="muted">Next election</span><span class="mono">[DATE]</span></div><div class="kv"><span class="muted">Upgrade notice</span><span class="mono">14 days minimum</span></div><div class="kv"><span class="muted">Adoption</span><span class="mono">all runners</span></div></div></div>
+  <div class="panel"><div class="panel-h"><h3>Change log</h3><span class="muted" style="font-size:12px">every rule change since genesis</span></div>${upgradeTable(UPGRADES)}</div></div>
+  <div class="section" style="margin-top:48px"><h2 style="margin-bottom:16px">Foundation wallet signers</h2><div class="panel">${signersTable(SIGNERS_F)}</div></div>
+  <div class="section"><h2 style="margin-bottom:16px">Tech Builders wallet signers</h2><div class="panel">${signersTable(SIGNERS_T)}</div></div>
+  <div class="section"><h2 style="margin-bottom:16px">Elections and recall</h2><div class="panel rows">
+    <div class="k">Who votes</div><div>Any address with a balance above 0 at the snapshot block. One address, one vote.</div>
+    <div class="k">Nominations</div><div>Open to anyone. A nominee publishes name, affiliation and any financial relationship to existing signers.</div>
+    <div class="k">Recall</div><div>A recall vote opens when 5% of holding addresses sign a request. Passes at a simple majority of votes cast.</div>
+    <div class="k">Founder seats</div><div>Roy and Andrey hold seats until the first election in January 2027. After that, founders stand like everyone else.</div>
+  </div></div></div>`;
+P.upgrade = (v) => {
+  const u = UPGRADES.find(x=>x.v===v);
+  if(!u) return `<div class="wrap page"><h1>Not found</h1></div>`;
+  return `<div class="wrap page">${NOTE}<div class="crumb"><a href="#/governance">Governance</a><span>/</span><span>${u.v}</span></div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><h1 style="font-size:34px">${u.v}</h1><span class="tag ${u.status==='Active'?'green':'amber'}">${u.status}</span></div>
+  <p class="lede" style="margin:0 0 24px">${esc(u.title)}</p>
+  <div class="panel rows">
+    <div class="k">Proposed</div><div class="mono">${u.proposed}</div>
+    <div class="k">Signatures</div><div class="mono">${u.signed}</div>
+    <div class="k">Activated</div><div class="mono">${u.block?'block '+fmt(u.block)+' · '+dateStr(blockTime(u.block)):'not yet'}</div>
+    ${u.notice?`<div class="k">Notice</div><div>${u.notice}</div>`:''}
+    <div class="k">Adopted by</div><div class="mono">${u.block?'runner-1, runner-2, runner-3, runner-4':'-'}</div>
+  </div>
+  <div class="section" style="margin-top:32px"><h2 style="margin-bottom:12px">What changes</h2><div class="panel panel-b list body">${u.text.map((t,i)=>`<div style="display:flex;gap:12px"><span class="mono muted" style="width:16px">${i+1}</span><span>${t}</span></div>`).join('')}</div></div>
+  <p class="muted" style="font-size:13px">Full text, diff against the previous version and the signed proposal document: [LINK]</p></div>`;
+};
+P.runners = () => {
+  const H = height();
+  return `<div class="wrap page">${NOTE}<div class="kicker">Runners</div><h1>Who runs the protocol</h1><p class="lede" style="margin:16px 0 32px">Runners produce blocks and validate transactions. Each earns the validator share of the blocks it produces. Any runner can be replaced; no runner can change the rules alone.</p>
+  <div class="panel tw"><table><thead><tr><th>Runner</th><th>Operator</th><th>Location</th><th>Since</th><th>Version</th><th class="right">Height</th><th class="right">Blocks produced</th><th>Status</th></tr></thead><tbody>
+  ${RUNNERS.map((r,i)=>`<tr><td class="mono">${r.id}</td><td class="wrap-ok">${esc(r.op)}${r.independent?' <span class="tag gray">independent</span>':''}</td><td>${r.city}</td><td class="mono muted">blk ${fmt(r.since)}</td><td class="mono">${r.version}</td><td class="right mono">${fmt(H - (i===2?1:0))}</td><td class="right mono">${fmt(Math.floor((H - r.since)/4))}</td><td><span class="status-ok"><span class="dot"></span>${i===2?'1 block behind':'in sync'}</span></td></tr>`).join('')}
+  </tbody></table></div>
+  <div class="grid2" style="margin-top:32px">
+    <div class="panel"><div class="panel-h"><h3>Run a node</h3></div><div class="panel-b list body" style="font-size:14px"><div>Requirements: 2 vCPU, 4 GB RAM, 40 GB disk, a public IP.</div><div>Install from the release tag, sync from genesis (about 20 minutes), announce your key.</div><div>New runners are admitted by the existing runners at a simple majority. Removal follows the same rule.</div><a href="#/documents">Setup guide [LINK]</a></div></div>
+    <div class="panel"><div class="panel-h"><h3>What a runner cannot do</h3></div><div class="panel-b list body" style="font-size:14px"><div>Create Karma outside the issuance rule.</div><div>Freeze, seize or reassign a balance.</div><div>Change the rules without a signed upgrade.</div><div>Censor a valid transaction for more than one block: the next runner includes it.</div></div></div>
+  </div></div>`;
+};
+P.documents = () => `<div class="wrap page">${NOTE}<div class="kicker">Documents</div><h1>Read the source</h1><p class="lede" style="margin:16px 0 32px">Everything on this site can be checked against the specification, the code and the ledger itself.</p>
+  ${docCards()}
+  <div class="section" style="margin-top:48px"><h2 style="margin-bottom:16px">Ledger API</h2><div class="panel rows">
+    <div class="k">Base</div><div class="mono">https://api.karmanetwork.org/v1</div>
+    <div class="k">Endpoints</div><div class="mono" style="white-space:normal">/blocks · /blocks/{n} · /tx/{id} · /addresses · /addresses/{addr} · /supply · /runners · /upgrades</div>
+    <div class="k">Auth</div><div class="mono">none · read-only · rate limit 60 requests/minute</div>
+    <div class="k">Export</div><div class="mono">any table on this site as CSV, any address history as CSV</div>
+  </div></div>
+  <div class="section"><h2 style="margin-bottom:16px">Contact</h2><div class="panel rows">
+    <div class="k">Protocol questions</div><div class="mono">[EMAIL]</div>
+    <div class="k">Security disclosure</div><div class="mono">[EMAIL] · PGP key [LINK]</div>
+    <div class="k">Press</div><div class="mono">[EMAIL]</div>
+  </div></div></div>`;
+P.status = () => {
+  const H = height();
+  return `<div class="wrap page">${NOTE}<div class="kicker">Status</div><h1>Network status</h1><p class="lede" style="margin:16px 0 32px">Live view of the chain and the services this site depends on.</p>
+  <div class="stats" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+    <div class="stat"><div class="l">Block height</div><div class="v">${fmt(H)}</div><div class="s">${ago(blockTime(H))}</div></div>
+    <div class="stat"><div class="l">Next block expected</div><div class="v">${Math.max(0,Math.ceil((blockTime(H+1)-Date.now())/60000))} min</div><div class="s">10-minute target</div></div>
+    <div class="stat"><div class="l">Runners in sync</div><div class="v">3 of 4</div><div class="s">runner-3 one block behind</div></div>
+    <div class="stat"><div class="l">Uptime since genesis</div><div class="v">99.94%</div><div class="s">1 incident</div></div>
+  </div>
+  <div class="section" style="margin-top:32px"><h2 style="margin-bottom:16px">Services</h2><div class="panel tw"><table><thead><tr><th>Service</th><th>Status</th><th>Last checked</th></tr></thead><tbody>
+    <tr><td>Block production</td><td><span class="status-ok"><span class="dot"></span>operational</span></td><td class="mono muted">just now</td></tr>
+    <tr><td>Ledger API</td><td><span class="status-ok"><span class="dot"></span>operational</span></td><td class="mono muted">just now</td></tr>
+    <tr><td>This site</td><td><span class="status-ok"><span class="dot"></span>operational</span></td><td class="mono muted">just now</td></tr>
+  </tbody></table></div></div>
+  <div class="section"><h2 style="margin-bottom:16px">Incidents</h2><div class="panel tw"><table><thead><tr><th>Date</th><th>What happened</th><th>Duration</th><th>Resolution</th></tr></thead><tbody>
+    <tr><td class="mono muted">3 Apr 2026</td><td class="wrap-ok">runner-1 and runner-2 lost connectivity in the same data centre; block production paused.</td><td class="mono">4 h 10 min</td><td class="wrap-ok">Runners moved to separate providers. Led to runner-3 and runner-4 being added.</td></tr>
+  </tbody></table></div></div></div>`;
+};
+P.search = (q) => {
+  const s = (q.q||'').trim();
+  if(!s) return `<div class="wrap page"><h1>Search</h1><p class="body" style="margin-top:12px">Enter an address, a block number or a transaction id.</p></div>`;
+  if(/^\d[\d,]*$/.test(s)) { location.hash = '#/block/'+s.replace(/,/g,''); return ''; }
+  const exact = byAddr[s]; if(exact){ location.hash='#/address/'+s; return ''; }
+  const tx = TX.find(t=>t.id.startsWith(s.toLowerCase())); if(tx && s.length>=8){ location.hash='#/tx/'+tx.id; return ''; }
+  const found = ADDR.filter(a=>a.addr.toLowerCase().startsWith(s.toLowerCase()) || (a.label&&a.label.toLowerCase().includes(s.toLowerCase()))).slice(0,50);
+  return `<div class="wrap page"><h1>Search</h1><p class="muted" style="margin:8px 0 24px">${found.length} result${found.length===1?'':'s'} for <span class="mono">${esc(s)}</span></p>${found.length?`<div class="panel">${holdersTable(found, ISSUED())}</div>`:'<div class="empty">Nothing on the ledger matches.</div>'}</div>`;
+};
+
+/* ---------- router ---------- */
+function parse(){
+  const raw = location.hash.replace(/^#/, '') || '/';
+  const [path, qs] = raw.split('?');
+  const q = {}; (qs||'').split('&').forEach(p=>{ if(!p) return; const [k,v]=p.split('='); q[decodeURIComponent(k)] = decodeURIComponent(v||''); });
+  return { seg: path.split('/').filter(Boolean), q };
+}
+function render(){
+  const { seg, q } = parse();
+  let html = '', nav = '';
+  const s0 = seg[0]||'';
+  if(!s0) html = P.home();
+  else if(s0==='protocol'){ html=P.protocol(); nav='protocol'; }
+  else if(s0==='ledger'){ nav='ledger'; html = seg[1]==='transactions'?P.transactions(q):seg[1]==='addresses'?P.addresses(q):P.blocks(q); }
+  else if(s0==='wallets'){ html=P.wallets(); nav='wallets'; }
+  else if(s0==='address'){ html=P.address(seg[1]||''); nav='ledger'; }
+  else if(s0==='block'){ html=P.block(seg[1]); nav='ledger'; }
+  else if(s0==='tx'){ html=P.tx(seg[1]||''); nav='ledger'; }
+  else if(s0==='governance'){ nav='governance'; html = seg[1]?P.upgrade(seg[1]):P.governance(); }
+  else if(s0==='runners'){ html=P.runners(); nav='runners'; }
+  else if(s0==='documents'){ html=P.documents(); nav='documents'; }
+  else if(s0==='status'){ html=P.status(); }
+  else if(s0==='search'){ html=P.search(q); nav='ledger'; }
+  else html = '<div class="wrap page"><h1>Page not found</h1></div>';
+  if(!html) return;
+  document.getElementById('app').innerHTML = html;
+  document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('on', a.dataset.nav===nav));
+  document.getElementById('links').classList.remove('open');
+  window.scrollTo(0,0);
+  document.title = 'Karma Network' + (nav?' - '+nav.charAt(0).toUpperCase()+nav.slice(1):'');
+}
+function tick(){ const H=height(); document.getElementById('navBlock').textContent = 'Block ' + fmt(H); }
+window.addEventListener('hashchange', render);
+document.getElementById('searchForm').addEventListener('submit', e=>{ e.preventDefault(); const v=document.getElementById('q').value.trim(); if(v) location.hash='#/search?q='+encodeURIComponent(v); document.getElementById('q').value=''; });
+document.getElementById('menuBtn').addEventListener('click', ()=>document.getElementById('links').classList.toggle('open'));
+document.addEventListener('click', e=>{ const b=e.target.closest('[data-copy]'); if(!b) return; try{ navigator.clipboard.writeText(b.dataset.copy); b.style.borderColor='var(--green)'; setTimeout(()=>b.style.borderColor='',1200);}catch(err){} });
+render(); tick(); setInterval(tick, 30000);
+</script>
+</body>
+</html>
