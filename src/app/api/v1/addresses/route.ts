@@ -8,6 +8,6 @@ export const dynamic = "force-dynamic";
 
 export const GET = (req: NextRequest) =>
   guard(async () => {
-    if (isLive()) return ok(await liveJson.addresses());
-    return ok(await getLedger().addresses(pageParam(req.nextUrl.searchParams.get("p") ?? undefined)));
+    const p = pageParam(req.nextUrl.searchParams.get("p") ?? undefined);
+    return ok(isLive() ? await liveJson.addresses(p) : await getLedger().addresses(p));
   });

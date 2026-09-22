@@ -18,7 +18,7 @@ export class LedgerError extends Error {
  * data cache; nothing on the chain changes faster than a block. A non-2xx is an ERROR even
  * when its body is valid JSON (a 401 body once flowed into .map and took a page down).
  */
-export async function get<T>(path: string, revalidate = 60): Promise<T> {
+export async function getRaw<T extends { data: unknown }>(path: string, revalidate = 60): Promise<T> {
   const res = await fetch(ledgerBase() + path, {
     next: { revalidate },
     signal: AbortSignal.timeout(15_000),
@@ -27,7 +27,11 @@ export async function get<T>(path: string, revalidate = 60): Promise<T> {
   if (!res.ok) throw new LedgerError(`ledger ${path} answered ${res.status}`, res.status);
   const json: unknown = await res.json();
   if (!json || typeof json !== "object" || !("data" in json)) throw new LedgerError(`ledger ${path}: no data envelope`, 502);
-  return (json as { data: T }).data;
+  return json as T;
+}
+
+export async function get<T>(path: string, revalidate = 60): Promise<T> {
+  return (await getRaw<{ data: T }>(path, revalidate)).data;
 }
 
 export async function getOrNull<T>(path: string, revalidate = 60): Promise<T | null> {

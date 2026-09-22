@@ -2,9 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CopyButton } from "@/components/CopyButton";
 import { Crumb, LedgerTabs } from "@/components/ui";
-import { KD, ago, fmt, isoMs, short, shortTx, timeStr } from "@/lib/format";
-import { ADDRESS_RE, RECENT_WINDOW, TX_ID_RE, block, blocks, mempoolTo, overview, recentTransfers, runnerSigners, transfers } from "@/lib/ledger/live/data";
-import { LiveTxTable, NotPublished, SimplePager } from "./parts";
+import { KD, ago, dateStr, fmt, isoMs, pctDec, short, shortTx, timeStr } from "@/lib/format";
+import { ADDRESS_RE, TX_ID_RE, address, addresses, block, blocks, isLiveTxType, mempoolTo, overview, protocolWallets, runnerSigners, supplyIdentity, transactions, txById, type LiveTxType } from "@/lib/ledger/live/data";
+import { Tabs } from "@/components/ui";
+import { LiveAddr, LiveTxTable, RankedTable, SimplePager, txTypeLabel } from "./parts";
 
 const BLOCKS_PER_PAGE = 25;
 const TXS_PER_PAGE = 40;
@@ -44,67 +45,113 @@ export async function LiveBlocks({ page }: { page: number }) {
   );
 }
 
-export async function LiveTransactions({ page }: { page: number }) {
-  const list = await transfers(TXS_PER_PAGE, (page - 1) * TXS_PER_PAGE);
+const TYPE_TABS: { id: string; label: string }[] = [{ id: "all", label: "All" }, { id: "transfer", label: "Transfers" }, { id: "grant", label: "Grants" }, { id: "stake", label: "Stakes" }, { id: "unstake", label: "Unstakes" }];
+const txHref = (type: string, p = 1) => {
+  const q = new URLSearchParams();
+  if (type !== "all") q.set("type", type);
+  if (p > 1) q.set("p", String(p));
+  const qs = q.toString();
+  return `/ledger/transactions${qs ? `?${qs}` : ""}`;
+};
+
+export async function LiveTransactions({ page, type: rawType }: { page: number; type?: string }) {
+  const type: LiveTxType | undefined = isLiveTxType(rawType) ? rawType : undefined;
+  const [{ items, total }, pw] = await Promise.all([transactions(TXS_PER_PAGE, (page - 1) * TXS_PER_PAGE, type), protocolWallets()]);
+  const pages = Math.max(1, Math.ceil(total / TXS_PER_PAGE));
   return (
     <div className="wrap page">
       <div className="kicker">Ledger</div>
       <h1>Transactions</h1>
       <LedgerTabs on="tx" />
-      <p className="muted f13" style={{ margin: "0 0 12px" }}>Transfers and grants, newest first, as the ledger publishes them: addresses only. Stakes, unstakes and rewards are not in this feed; stakes appear on the page of the block that included them.</p>
-      <div className="panel"><LiveTxTable list={list} /></div>
-      <SimplePager href={(p) => `/ledger/transactions?p=${p}`} page={page} hasOlder={list.length === TXS_PER_PAGE} note={`${TXS_PER_PAGE} per page`} />
+      <div style={{ marginBottom: 12 }}><Tabs on={type ?? "all"} items={TYPE_TABS.map((t) => ({ id: t.id, href: txHref(t.id), label: t.label }))} /></div>
+      <div className="panel"><LiveTxTable list={items} labels={pw.labels} /></div>
+      <SimplePager href={(p) => txHref(type ?? "all", p)} page={page} hasOlder={page < pages} note={`${fmt(total)} ${type ? txTypeLabel(type).toLowerCase() + "s" : "transactions"}, ${TXS_PER_PAGE} per page`} />
+      <p className="muted f13" style={{ marginTop: 10 }}>Addresses only. A stake or unstake goes to a Kreator, which the ledger does not publish as an address. Grants carry no block number.</p>
     </div>
   );
 }
 
-export function LiveAddresses() {
+const ADDRS_PER_PAGE = 50;
+export async function LiveAddresses({ page }: { page: number }) {
+  const [list, pw, ov, sup] = await Promise.all([addresses(ADDRS_PER_PAGE, (page - 1) * ADDRS_PER_PAGE), protocolWallets(), overview(), supplyIdentity()]);
+  const total = ov.wallets.total;
   return (
     <div className="wrap page">
       <div className="kicker">Ledger</div>
       <h1>Addresses</h1>
       <LedgerTabs on="addr" />
-      <NotPublished title="Ranked balances">
-        <div>The ledger&apos;s public API has no endpoint that lists addresses or balances, so this page cannot be built from the ledger yet. Nothing is estimated in its place.</div>
-        <div>What it needs: a public, address-only route returning address, balance and rank, paginated. No names, handles or profile data.</div>
-        <div>An address you already know can still be opened: paste it into the search box. Its page shows what the ledger does publish about it.</div>
-      </NotPublished>
+      <div className="panel"><RankedTable list={list} labels={pw.labels} issued={sup.total_in_wallets} /></div>
+      <SimplePager href={(p) => `/ledger/addresses?p=${p}`} page={page} hasOlder={list.length === ADDRS_PER_PAGE && page * ADDRS_PER_PAGE < total + ADDRS_PER_PAGE} note={`${fmt(total)} wallets, ranked by balance, ${ADDRS_PER_PAGE} per page`} />
+      <p className="muted f13" style={{ marginTop: 10 }}>Labels appear only on protocol pool wallets. Every other address is pseudonymous.</p>
     </div>
   );
 }
 
-export async function LiveAddress({ addr: raw }: { addr: string }) {
+const ADDR_TXS = 40;
+export async function LiveAddress({ addr: raw, page, type: rawType }: { addr: string; page: number; type?: string }) {
   const addr = raw.toLowerCase();
   if (!ADDRESS_RE.test(addr)) notFound();
-  const [recent, pending] = await Promise.all([recentTransfers(), mempoolTo(addr)]);
-  const mine = recent.filter((t) => t.sender_address === addr || t.receiver_address === addr);
+  const type: LiveTxType | undefined = isLiveTxType(rawType) ? rawType : undefined;
+  const [d, pending, pw, sup] = await Promise.all([address(addr, ADDR_TXS, (page - 1) * ADDR_TXS, type), mempoolTo(addr), protocolWallets(), supplyIdentity()]);
+  if (!d) notFound();
+  const label = pw.labels[addr];
+  const pools = pw.pools.filter((p) => p.public_address === addr);
+  const pre = pw.preMine.filter((p) => p.public_address === addr);
+  const unseen = d.tx_count === 0 && d.balance === "0.000" && !d.first_seen;
+  const href = (p: number, t = type ?? "all") => {
+    const q = new URLSearchParams();
+    if (t !== "all") q.set("type", t);
+    if (p > 1) q.set("p", String(p));
+    const qs = q.toString();
+    return `/address/${addr}${qs ? `?${qs}` : ""}`;
+  };
   return (
     <div className="wrap page">
-      <Crumb items={[{ href: "/ledger/addresses", label: "Addresses" }, { label: short(addr) }]} />
-      <h1 style={{ fontSize: 34, marginBottom: 10 }}>Address</h1>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, maxWidth: "100%", marginBottom: 24 }}>
+      <Crumb items={[{ href: "/ledger/addresses", label: "Addresses" }, { label: label ?? short(addr) }]} />
+      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+        <h1 style={{ fontSize: 34 }}>{label ?? "Address"}</h1>
+        {pools.length > 0 && <span className="tag">protocol-controlled</span>}
+        {pre.length > 0 && <span className="tag gray">pre-mine recipient</span>}
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, maxWidth: "100%", margin: "10px 0 24px" }}>
         <div className="addrbox"><span>{addr}</span></div>
         <CopyButton value={addr} />
       </div>
-      <NotPublished title="Balance and full history">
-        <div>The ledger&apos;s public API has no per-address endpoint: no balance, no stake total, no complete history. This page cannot confirm that the address exists. It shows only what can be found in the public feeds below.</div>
-      </NotPublished>
-      <div className="section" style={{ marginTop: 32 }}>
-        <h2 style={{ marginBottom: 12 }}>Incoming, not yet in a block</h2>
-        <div className="panel">
-          {pending.length ? (
-            <div className="tw"><table>
-              <thead><tr><th>Submitted</th><th>From</th><th className="right">Amount</th></tr></thead>
-              <tbody>{pending.map((m, i) => (
-                <tr key={i}><td className="mono muted">{ago(isoMs(m.submitted_at))}</td><td>{m.sender_address ? <Link className="mono" href={`/address/${m.sender_address}`}>{short(m.sender_address)}</Link> : "-"}</td><td className="right mono">{KD(m.amount)}</td></tr>
-              ))}</tbody>
-            </table></div>
-          ) : <div className="empty">Nothing waiting.</div>}
-        </div>
+      {unseen && <div className="note" style={{ borderColor: "var(--muted)", color: "var(--muted)" }}>This address has never appeared on the ledger.</div>}
+      {pools.map((p) => <p key={p.name} className="body f14" style={{ maxWidth: 720, margin: "0 0 16px" }}>Receives the {p.label} share of every block&apos;s emission. <Link href="/wallets">Protocol wallets →</Link></p>)}
+      <div className="stats n4">
+        <div className="stat"><div className="l">Balance</div><div className="v">{KD(d.balance)}</div><div className="s">{pctDec(d.balance, sup.total_in_wallets, 3)} of all Karma in wallets</div></div>
+        <div className="stat"><div className="l">Staked</div><div className="v">{KD(d.staked)}</div><div className="s">on Kreators</div></div>
+        <div className="stat"><div className="l">First seen</div><div className="v">{d.first_seen ? dateStr(isoMs(d.first_seen)) : "-"}</div><div className="s">{d.first_seen ? ago(isoMs(d.first_seen)) : "never"}</div></div>
+        <div className="stat"><div className="l">Transactions</div><div className="v">{fmt(d.tx_count)}</div><div className="s">transfers, grants, stakes, unstakes</div></div>
       </div>
-      <div className="section">
-        <div className="sec-head" style={{ marginBottom: 12 }}><h2>Transfers</h2><span className="muted f13">found among the latest {fmt(Math.min(RECENT_WINDOW, recent.length))} public transactions only</span></div>
-        <div className="panel"><LiveTxTable list={mine} /></div>
+      {pre.length > 0 && (
+        <div className="section" style={{ marginTop: 32 }}>
+          <h2 style={{ marginBottom: 12 }}>Pre-mine allocation</h2>
+          <div className="panel tw"><table>
+            <thead><tr><th>Allocation</th><th className="right">Total</th><th className="right">Released so far</th><th className="right">Per day</th><th>Vesting</th></tr></thead>
+            <tbody>{pre.map((p) => (
+              <tr key={p.name}><td className="mono">{p.name}</td><td className="right mono">{KD(p.total_allocation)}</td><td className="right mono">{KD(p.total_released)} ({pctDec(p.total_released, p.total_allocation, 1)})</td><td className="right mono">{KD(p.daily_release)}</td><td className="mono muted">{p.vesting_start ? dateStr(isoMs(p.vesting_start)) : "-"} to {p.vesting_end ? dateStr(isoMs(p.vesting_end)) : "-"}</td></tr>
+            ))}</tbody>
+          </table></div>
+        </div>
+      )}
+      {pending.length > 0 && (
+        <div className="section" style={{ marginTop: 32 }}>
+          <h2 style={{ marginBottom: 12 }}>Incoming, not yet in a block</h2>
+          <div className="panel tw"><table>
+            <thead><tr><th>Submitted</th><th>From</th><th className="right">Amount</th></tr></thead>
+            <tbody>{pending.map((m, i) => (
+              <tr key={i}><td className="mono muted">{ago(isoMs(m.submitted_at))}</td><td><LiveAddr a={m.sender_address} labels={pw.labels} /></td><td className="right mono">{KD(m.amount)}</td></tr>
+            ))}</tbody>
+          </table></div>
+        </div>
+      )}
+      <div className="section" style={{ marginTop: 32 }}>
+        <h2 style={{ marginBottom: 12 }}>Transactions</h2>
+        <div style={{ marginBottom: 12 }}><Tabs on={type ?? "all"} items={TYPE_TABS.map((t) => ({ id: t.id, href: href(1, t.id), label: t.label }))} /></div>
+        <div className="panel"><LiveTxTable list={d.transactions} labels={pw.labels} /></div>
+        <SimplePager href={(p) => href(p)} page={page} hasOlder={d.transactions.length === ADDR_TXS} note={`${ADDR_TXS} per page`} />
       </div>
     </div>
   );
@@ -192,27 +239,21 @@ export async function LiveBlock({ n }: { n: number }) {
 export async function LiveTx({ id: raw }: { id: string }) {
   const id = raw.toLowerCase();
   if (!TX_ID_RE.test(id)) notFound();
-  const recent = await recentTransfers();
-  const t = recent.find((x) => x.id === id);
+  const [t, pw] = await Promise.all([txById(id), protocolWallets()]);
+  if (!t) notFound();
   return (
     <div className="wrap page">
       <Crumb items={[{ href: "/ledger/transactions", label: "Transactions" }, { label: <span className="mono">{shortTx(id)}</span> }]} />
-      <h1 style={{ marginBottom: 24 }}>Transaction</h1>
-      {t ? (
-        <div className="panel rows">
-          <div className="k">Id</div><div className="mono break">{t.id}</div>
-          <div className="k">Time</div><div className="mono">{timeStr(isoMs(t.created_at))} · {ago(isoMs(t.created_at))}</div>
-          <div className="k">Type</div><div>{t.type === "grant" ? "Grant" : "Transfer"}</div>
-          <div className="k">From</div><div className="break">{t.sender_address ? <Link className="mono" href={`/address/${t.sender_address}`}>{t.sender_address}</Link> : <span className="muted">protocol</span>}</div>
-          <div className="k">To</div><div className="break">{t.receiver_address ? <Link className="mono" href={`/address/${t.receiver_address}`}>{t.receiver_address}</Link> : <span className="muted">-</span>}</div>
-          <div className="k">Amount</div><div className="mono">{KD(t.amount)}</div>
-          <div className="k">Fee</div><div className="mono">{KD(t.fee_amount)} · {KD(t.fee_burned)} burned</div>
-        </div>
-      ) : (
-        <NotPublished title="Not in the recent feed">
-          <div>The ledger&apos;s public API has no lookup by transaction id. This site can only search the latest {fmt(RECENT_WINDOW)} public transactions, and <span className="mono">{id}</span> is not among them. It may be older, or it may not exist.</div>
-        </NotPublished>
-      )}
+      <h1 style={{ marginBottom: 24 }}>{txTypeLabel(t.type)}</h1>
+      <div className="panel rows">
+        <div className="k">Id</div><div className="mono break">{t.id}</div>
+        <div className="k">Block</div><div>{t.block_number ? <Link className="mono" href={`/block/${t.block_number}`}>{fmt(t.block_number)}</Link> : <span className="muted">not recorded for grants</span>}</div>
+        <div className="k">Time</div><div className="mono">{timeStr(isoMs(t.created_at))} · {ago(isoMs(t.created_at))}</div>
+        <div className="k">From</div><div className="break"><LiveAddr a={t.sender_address} labels={pw.labels} full /></div>
+        <div className="k">To</div><div className="break">{t.receiver_address ? <LiveAddr a={t.receiver_address} labels={pw.labels} full /> : <span className="muted">-</span>}</div>
+        <div className="k">Amount</div><div className="mono">{KD(t.amount)}</div>
+        <div className="k">Fee</div><div className="mono">{KD(t.fee_amount)} · {KD(t.fee_burned)} burned</div>
+      </div>
     </div>
   );
 }

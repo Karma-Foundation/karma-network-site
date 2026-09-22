@@ -144,29 +144,27 @@ show only what the chain already serves to anyone.
 |---|---|---|
 | `/`, `/protocol` | `/network/overview`, `/supply`, `/parameters`, `/blocks` | real rules, real supply identity |
 | `/ledger/blocks`, `/block/[n]` | `/blocks`, `/blocks/:n`, `/rewards`, `/replay-envelopes` | real: hashes, proposer, signatures, actions (action + amount only), reward cycles |
-| `/ledger/transactions` | `/transactions` | real transfers and grants, addresses only. No stakes, no type filter, no total |
+| `/ledger/transactions` | `/transactions` | real transfers, grants, stakes, unstakes; type filter; total; block numbers (grants have none) |
 | `/governance`, `/governance/[key]` | `/parameters`, `/parameters/history` | real parameters and change log. No signers or elections: not on the ledger |
 | `/notices` | `/parameters/history` | one notice per day with a parameter change. Nothing else is published |
 | `/runners`, `/status` | `/runners/active`, `/validators`, `/supply` | real. No incident log exists |
-| `/search` | - | block number, full 64-hex address, tx UUID. No partial or label search |
-| `/tx/[id]` | `/transactions` x5 | PARTIAL: found only among the latest 500 public transactions |
-| `/address/[addr]` | `/transactions` x5, `/mempool?to=` | PARTIAL: recent transfers and pending incoming. NO balance |
-| `/ledger/addresses` | none | NOT PUBLISHED |
-| `/wallets` | `/parameters`, `/supply` | pool shares and pre-mine totals only. Addresses, balances, outflows, signers NOT PUBLISHED |
+| `/search` | - | block number, full 64-hex address, tx UUID. No partial search |
+| `/tx/[id]` | `/transactions/:id` | real, transfers and grants (stakes have no id page; they link to their block) |
+| `/address/[addr]` | `/addresses/:addr`, `/mempool?to=` | real: balance, staked, first seen, paginated type-filtered history, pending incoming |
+| `/ledger/addresses` | `/addresses` | real ranked holders, pool wallets labelled via `/protocol-wallets` |
+| `/wallets` | `/protocol-wallets`, `/addresses/:addr` | real pool addresses, balances, pre-mine vesting. Signers / policy NOT ON THE LEDGER |
 
 ### What is missing, and how to get it
 
-All of these are new routes or fixes in `Karma-Foundation/Karma-Protocol` (the protocol owner's
-lane: a PR for them to merge, never a direct change). All must stay address-only.
+Karma-Protocol #683 (2026-09-22) added `/public/addresses`, `/public/addresses/:addr`,
+`/public/transactions/:id`, the extended `/public/transactions` and `/public/protocol-wallets`,
+which closed every data gap this site had. What remains is not an API gap but things the ledger
+does not record at all, so they stay bracketed:
 
-1. `GET /public/addresses?limit&offset` - address, balance, staked, rank. Unlocks `/ledger/addresses` and "who holds Karma".
-2. `GET /public/addresses/:addr` - balance, staked, first seen, tx count, paginated history. Unlocks the address page.
-3. `GET /public/transactions/:id` - one transfer or grant by id, with its block number.
-4. `/public/transactions`: add `block_number`, a `type` filter, a total count, and stake / unstake rows.
-5. Protocol wallets: publish the Foundation and Tech Builders pool ADDRESSES (today the pool wallet ids are deliberately stripped) so they resolve through route 2. Plus the pre-mine recipients and vesting schedule.
-6. Signers and thresholds of those wallets, if and when they are multisig on the ledger. Today they are not, so there is nothing to read.
-7. An incident log and software-version history, if the site should list upgrades and outages.
-8. One consistency fix to the change-log endpoint, filed privately in the protocol repo. Until it lands this site redacts on its own side (see below).
+1. Who can sign for the pool wallets, thresholds, spending policy (the wallets are not multisig on the ledger).
+2. Who holds the `system:foundation` key that applies config updates, and any election or recall process.
+3. An incident log and a software-version history.
+4. A stake or unstake's counterparty is a Kreator profile, deliberately not published as an address.
 
 ### Redaction
 

@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function Addresses({ searchParams }: { searchParams: Promise<{ p?: string | string[] }> }) {
   const page = pageParam((await searchParams).p);
-  if (isLive()) return <LiveAddresses />;
+  if (isLive()) return <LiveAddresses page={page} />;
   const ledger = getLedger();
   const [data, supply] = await Promise.all([ledger.addresses(page), ledger.supply()]);
   return (
