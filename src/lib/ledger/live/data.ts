@@ -1,4 +1,4 @@
-import { asArray, get, getOrNull } from "./api";
+import { asArray, get, getOrNull, getRaw } from "./api";
 
 /*
  * Typed readers over the public API. PRIVACY: nothing here may surface a person. The API is
@@ -62,7 +62,7 @@ export interface LiveBlock {
 export interface LiveSignature { signer_id: string; public_key: string; signature: string; created_at: string }
 export interface RewardCycle { cycle_type: string; total_pool: string; distributed_amount: string; burned_amount: string; profiles_count: number; activation_ratio: string }
 export interface Envelope { id: string; action: string; amount: string | null; payload_hash: string; submitted_at: string }
-export interface LiveTx { id: string; amount: string; fee_amount: string; fee_burned: string; created_at: string; type: string; sender_address: string | null; receiver_address: string | null }
+export interface LiveTx { id: string; amount: string; fee_amount: string; fee_burned: string; created_at: string; type: string; sender_address: string | null; receiver_address: string | null; block_number?: number | null }
 export interface Param { key: string; value: string; data_type: string; category: string; updated_at: string }
 export interface ParamChange { timestamp: string; key: string; before: string | null; after: string | null; actor: string }
 export interface LiveRunner { name: string; endpoint: string | null; protocol_version: number | null; last_seen_at: string | null; stale: boolean; blocks_signed: number | null; last_signed_block: number | null; last_signed_at: string | null }
@@ -91,15 +91,41 @@ export async function block(n: number) {
   return { block: b.block, signatures: asArray<LiveSignature>(b.signatures), cycles: asArray<RewardCycle>(rewards?.cycles), envelopes };
 }
 
-export async function transfers(limit: number, offset: number): Promise<LiveTx[]> {
-  return asArray<LiveTx>(await get<unknown>(`/transactions?limit=${limit}&offset=${offset}`, 60));
+export type LiveTxType = "transfer" | "grant" | "stake" | "unstake";
+export const LIVE_TX_TYPES: LiveTxType[] = ["transfer", "grant", "stake", "unstake"];
+export const isLiveTxType = (x: unknown): x is LiveTxType => (LIVE_TX_TYPES as string[]).includes(String(x));
+
+/** Transfers, grants, stakes and unstakes, newest first. `total` is the full count for the filter. */
+export async function transactions(limit: number, offset: number, type?: LiveTxType): Promise<{ items: LiveTx[]; total: number }> {
+  const q = `limit=${limit}&offset=${offset}${type ? `&type=${type}` : ""}`;
+  const raw = await getRaw<{ data: unknown; total?: unknown }>(`/transactions?${q}`, 60);
+  return { items: asArray<LiveTx>(raw.data), total: typeof raw.total === "number" ? raw.total : 0 };
 }
 
-/** The newest RECENT_WINDOW public transactions: the only way to find a tx or an address's activity today. */
-export const RECENT_WINDOW = 500;
-export async function recentTransfers(): Promise<LiveTx[]> {
-  const pages = await Promise.all([0, 100, 200, 300, 400].map((o) => get<unknown>(`/transactions?limit=100&offset=${o}`, 120)));
-  return pages.flatMap((p) => asArray<LiveTx>(p));
+/** One transfer or grant by UUID. Stake and unstake rows have numeric ids and no page of their own. */
+export const txById = (id: string) => getOrNull<LiveTx>(`/transactions/${id}`, 300);
+
+export interface RankedAddress { public_address: string; balance: string; staked: string; rank: number }
+export async function addresses(limit: number, offset: number): Promise<RankedAddress[]> {
+  return asArray<RankedAddress>(await get<unknown>(`/addresses?limit=${limit}&offset=${offset}`, 60));
+}
+
+export interface AddressDetail { public_address: string; balance: string; staked: string; first_seen: string | null; tx_count: number; transactions: LiveTx[] }
+export async function address(addr: string, limit: number, offset: number, type?: LiveTxType): Promise<AddressDetail | null> {
+  const q = `limit=${limit}&offset=${offset}${type ? `&type=${type}` : ""}`;
+  const d = await getOrNull<AddressDetail>(`/addresses/${addr}?${q}`, 60);
+  return d ? { ...d, transactions: asArray<LiveTx>(d.transactions) } : null;
+}
+
+export interface Pool { name: string; label: string; public_address: string }
+export interface PreMine { name: string; public_address: string; total_allocation: string; total_released: string; daily_release: string; vesting_start: string | null; vesting_end: string | null }
+export async function protocolWallets(): Promise<{ pools: Pool[]; preMine: PreMine[]; labels: Record<string, string> }> {
+  const d = await get<{ pools: unknown; pre_mine: unknown }>("/protocol-wallets", 300);
+  const pools = asArray<Pool>(d.pools).filter((p) => ADDRESS_RE.test(p.public_address));
+  const preMine = asArray<PreMine>(d.pre_mine).filter((p) => ADDRESS_RE.test(p.public_address));
+  const labels: Record<string, string> = {};
+  for (const p of pools) labels[p.public_address] = `${p.label} pool`;
+  return { pools, preMine, labels };
 }
 
 export async function mempoolTo(addr: string) {

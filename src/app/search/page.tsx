@@ -19,7 +19,7 @@ export default async function Search({ searchParams }: { searchParams: Promise<{
     return (
       <div className="wrap page">
         <h1>Search</h1>
-        <p className="body" style={{ marginTop: 12 }}>Enter a block number, a full address (64 hexadecimal characters) or a transaction id. The ledger has no search endpoint, so partial matches and labels cannot be looked up.</p>
+        <p className="body" style={{ marginTop: 12 }}>Enter a block number, a full address (64 hexadecimal characters) or a transaction id. The ledger has no search endpoint, so partial matches cannot be looked up.</p>
       </div>
     );
   }

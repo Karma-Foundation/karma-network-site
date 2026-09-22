@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Crumb } from "@/components/ui";
 import { KD, ago, dateStr, fmt, isoMs, pctDec, timeStr } from "@/lib/format";
-import { ERAS, MAX_SUPPLY, blocks, eraOf, history, overview, paramMap, parameters, runners, supplyIdentity, type ParamChange } from "@/lib/ledger/live/data";
+import { ERAS, MAX_SUPPLY, address, blocks, eraOf, history, overview, paramMap, parameters, protocolWallets, runners, supplyIdentity, type ParamChange } from "@/lib/ledger/live/data";
 import { ChangeTable, NotPublished, ShareBarsLive, shareRows } from "./parts";
 
 export async function LiveProtocol() {
@@ -215,23 +215,57 @@ export async function LiveStatus() {
 }
 
 export async function LiveWallets() {
-  const [p, sup, latest] = await Promise.all([paramMap(), supplyIdentity(), blocks(1, 0)]);
+  const [p, sup, latest, pw] = await Promise.all([paramMap(), supplyIdentity(), blocks(1, 0), protocolWallets()]);
   const b = latest[0];
+  const details = await Promise.all(pw.pools.map((x) => address(x.public_address, 1, 0)));
+  const perBlock: Record<string, string | undefined> = { builders: b?.community_amount, foundation: b?.foundation_amount, tech_builders: b?.builders_amount, validators: b?.validators_amount };
+  const sharePct: Record<string, string | undefined> = { builders: p.emission_builders_pct, foundation: p.emission_foundation_pct, tech_builders: p.emission_tech_builders_pct, validators: p.emission_validators_pct };
   return (
     <div className="wrap page">
       <div className="kicker">Wallets</div>
       <h1>Protocol-controlled wallets</h1>
-      <p className="lede" style={{ margin: "16px 0 32px" }}>Two pools receive a share of every block, and a pre-mine allocation is released over time. The ledger publishes the amounts. It does not yet publish the wallets.</p>
-      <div className="cards">
-        <div className="card"><div className="cardk">Foundation pool</div><div className="big">{p.emission_foundation_pct ?? "-"}%</div><div className="d">{b ? `${KD(b.foundation_amount)} in the latest block` : "-"}</div></div>
-        <div className="card"><div className="cardk">Tech Builders pool</div><div className="big">{p.emission_tech_builders_pct ?? "-"}%</div><div className="d">{b ? `${KD(b.builders_amount)} in the latest block` : "-"}</div></div>
-        <div className="card"><div className="cardk">Pre-mine not yet released</div><div className="big">{KD(sup.unreleased_pre_mine)}</div><div className="d">of {KD(sup.total_allocation)} allocated at genesis</div></div>
+      <p className="lede" style={{ margin: "16px 0 32px" }}>Four pool wallets receive a share of every block, and two of them also hold the pre-mine allocation, released daily on a five-year schedule. All figures are the ledger&apos;s own.</p>
+      <div className="panel tw">
+        <table>
+          <thead><tr><th>Pool</th><th>Address</th><th className="right">Share</th><th className="right">Latest block</th><th className="right">Balance</th><th className="right">Staked</th><th className="right">Transactions</th></tr></thead>
+          <tbody>{pw.pools.map((x, i) => (
+            <tr key={x.name}>
+              <td className="fw5">{x.label}</td>
+              <td><Link className="mono" href={`/address/${x.public_address}`}>{x.public_address.slice(0, 8)}…{x.public_address.slice(-4)}</Link></td>
+              <td className="right mono">{sharePct[x.name] ?? "-"}%</td>
+              <td className="right mono">{perBlock[x.name] ? KD(perBlock[x.name]) : "-"}</td>
+              <td className="right mono">{details[i] ? KD(details[i]!.balance) : "-"}</td>
+              <td className="right mono">{details[i] && details[i]!.staked !== "0.000" ? KD(details[i]!.staked) : "-"}</td>
+              <td className="right mono">{details[i] ? fmt(details[i]!.tx_count) : "-"}</td>
+            </tr>
+          ))}</tbody>
+        </table>
       </div>
-      <div className="section" style={{ marginTop: 32 }}>
-        <NotPublished title="Addresses, balances, outflows and signers">
-          <div>The public API deliberately strips the pool wallet ids from block data, and has no per-address endpoint, so this site cannot show the Foundation or Tech Builders wallet address, its balance, what it has paid out, or who can sign for it.</div>
-          <div>It also does not publish who received the pre-mine allocation or the vesting schedule.</div>
-          <div>Spending policy, signers and thresholds: [DATE].</div>
+      <p className="muted f13" style={{ marginTop: 10 }}>The Builders share is paid out to Kreators and stakers every block rather than accumulating; its wallet is the pass-through.</p>
+
+      <div className="section" style={{ marginTop: 40 }}>
+        <h2 style={{ marginBottom: 12 }}>Pre-mine</h2>
+        <p className="body f14" style={{ maxWidth: 720, margin: "0 0 16px" }}>{KD(sup.total_allocation)} was allocated at genesis and vests daily. {KD(sup.unreleased_pre_mine)} is still unreleased.</p>
+        <div className="panel tw">
+          <table>
+            <thead><tr><th>Allocation</th><th>Address</th><th className="right">Total</th><th className="right">Released so far</th><th className="right">Per day</th><th>Vesting</th></tr></thead>
+            <tbody>{pw.preMine.map((x) => (
+              <tr key={x.name}>
+                <td className="mono">{x.name}</td>
+                <td><Link className="mono" href={`/address/${x.public_address}`}>{x.public_address.slice(0, 8)}…{x.public_address.slice(-4)}</Link>{pw.labels[x.public_address] && <> <span className="muted small">{pw.labels[x.public_address]}</span></>}</td>
+                <td className="right mono">{KD(x.total_allocation)}</td>
+                <td className="right mono">{KD(x.total_released)} ({pctDec(x.total_released, x.total_allocation, 1)})</td>
+                <td className="right mono">{KD(x.daily_release)}</td>
+                <td className="mono muted">{x.vesting_start ? dateStr(isoMs(x.vesting_start)) : "-"} to {x.vesting_end ? dateStr(isoMs(x.vesting_end)) : "-"}</td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="section">
+        <NotPublished title="Signers and spending policy">
+          <div>The ledger does not record who can sign for these wallets, how many signatures a transfer needs, or a spending policy. Every outgoing transaction is on each wallet&apos;s address page. Signers, thresholds and policy: [DATE].</div>
         </NotPublished>
       </div>
     </div>

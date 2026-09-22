@@ -20,8 +20,8 @@ const hrefFor = (type: TxFilter, p = 1) => {
 export default async function Transactions({ searchParams }: { searchParams: Promise<{ p?: string | string[]; type?: string | string[] }> }) {
   const sp = await searchParams;
   const page = pageParam(sp.p);
-  if (isLive()) return <LiveTransactions page={page} />;
   const rawType = Array.isArray(sp.type) ? sp.type[0] : sp.type;
+  if (isLive()) return <LiveTransactions page={page} type={rawType} />;
   const type: TxFilter = (TX_FILTERS as readonly string[]).includes(rawType ?? "") ? (rawType as TxFilter) : "all";
   const data = await getLedger().transactions(page, type);
   const filters: TxFilter[] = ["all", ...TX_FILTERS];

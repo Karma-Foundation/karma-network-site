@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { DocCards } from "@/components/ui";
 import { KD, ago, dateStr, fmt, fmtDec, isoMs, pctDec } from "@/lib/format";
-import { MAX_SUPPLY, eraOf, genesis, history, overview, paramMap, runners, supplyIdentity, blocks } from "@/lib/ledger/live/data";
-import { ChangeTable, NotPublished, ShareBarsLive, shareRows } from "./parts";
+import { MAX_SUPPLY, addresses, eraOf, genesis, history, overview, paramMap, protocolWallets, runners, supplyIdentity, blocks } from "@/lib/ledger/live/data";
+import { ChangeTable, RankedTable, ShareBarsLive, shareRows } from "./parts";
 
 export async function LiveHome() {
-  const [ov, sup, p, rs, hist, gen, latest] = await Promise.all([overview(), supplyIdentity(), paramMap(), runners(), history(), genesis(), blocks(1, 0)]);
+  const [ov, sup, p, rs, hist, gen, latest, top, pw] = await Promise.all([overview(), supplyIdentity(), paramMap(), runners(), history(), genesis(), blocks(1, 0), addresses(10, 0), protocolWallets()]);
+  const sum = (xs: string[]) => xs.reduce((a, x) => a + Number(x), 0);
+  const inWallets = Number(sup.total_in_wallets);
+  const poolHeld = sum(top.filter((a) => pw.labels[a.public_address]).map((a) => a.balance));
+  const top10 = sum(top.map((a) => a.balance));
   const lb = ov.chain.latest_block;
   const era = eraOf(lb.height);
   const perBlock = latest[0]?.emission_amount ?? null;
@@ -69,10 +73,21 @@ export async function LiveHome() {
           <div className="card"><div className="cardk">Pre-mine</div><div className="big">{KD(sup.total_allocation)}</div><div className="d">{pctDec(sup.total_allocation, MAX_SUPPLY, 0)} of max supply; {pctDec(sup.unreleased_pre_mine, sup.total_allocation, 1)} still unreleased</div></div>
           <div className="card"><div className="cardk">Transactions</div><div className="big">{fmt(ov.transactions.all_time)}</div><div className="d">all time</div></div>
         </div>
-        <div style={{ marginTop: 16 }}>
-          <NotPublished title="Balances by address">
-            <div>The ledger&apos;s public API does not publish a ranked list of balances, so this site cannot show who holds Karma. <Link href="/ledger/addresses">What is missing →</Link></div>
-          </NotPublished>
+      </div>
+
+      <div className="section">
+        <div className="sec-head">
+          <div style={{ maxWidth: 720 }}>
+            <h2>Who holds Karma</h2>
+            <p className="body">Every wallet on the ledger, ranked by balance. Protocol pool wallets are labelled. Everything else is a pseudonymous address.</p>
+          </div>
+          <Link href="/ledger/addresses" className="fw5" style={{ whiteSpace: "nowrap" }}>All {fmt(ov.wallets.total)} wallets →</Link>
+        </div>
+        <div className="panel"><RankedTable list={top.slice(0, 8)} labels={pw.labels} issued={sup.total_in_wallets} /></div>
+        <div className="cards" style={{ marginTop: 16 }}>
+          <div className="card"><div className="cardk">Protocol pool wallets</div><div className="big">{inWallets ? `${((100 * poolHeld) / inWallets).toFixed(1)}%` : "-"}</div><div className="d">of Karma in wallets, in the {pw.pools.length} pool wallets in the top 10</div></div>
+          <div className="card"><div className="cardk">Top 10 wallets</div><div className="big">{inWallets ? `${((100 * top10) / inWallets).toFixed(1)}%` : "-"}</div><div className="d">of Karma in wallets</div></div>
+          <div className="card"><div className="cardk">Kreator wallets</div><div className="big">{fmt(ov.wallets.kreators)}</div><div className="d">of {fmt(ov.wallets.total)} wallets</div></div>
         </div>
       </div>
 
@@ -93,10 +108,14 @@ export async function LiveHome() {
             <div className="body f14">As of September 2026, no company owns or operates the protocol. Formation of a foundation entity is under evaluation; this line will be updated when it changes.</div>
           </div>
         </div>
-        <div style={{ marginTop: 20 }}>
-          <NotPublished title="Protocol wallets and their signers">
-            <div>The Foundation and Tech Builders pools receive {p.emission_foundation_pct ?? "-"}% and {p.emission_tech_builders_pct ?? "-"}% of every block, but the ledger does not publish their addresses, balances or signers. <Link href="/wallets">Details →</Link></div>
-          </NotPublished>
+        <div className="grid2" style={{ marginTop: 20 }}>
+          {pw.pools.filter((x) => x.name === "foundation" || x.name === "tech_builders").map((x) => (
+            <div className="card" key={x.name}>
+              <div className="t">{x.label} pool</div>
+              <div className="body f14">Receives {x.name === "foundation" ? p.emission_foundation_pct : p.emission_tech_builders_pct}% of every block. Balance, history and pre-mine vesting are on its address page. Who can sign for it: [DATE].</div>
+              <Link href={`/address/${x.public_address}`} className="mono">{x.public_address.slice(0, 8)}…{x.public_address.slice(-4)} →</Link>
+            </div>
+          ))}
         </div>
       </div>
 

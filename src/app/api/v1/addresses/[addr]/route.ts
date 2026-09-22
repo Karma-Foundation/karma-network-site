@@ -4,11 +4,11 @@ import { liveJson } from "@/lib/ledger/live/json";
 
 export const dynamic = "force-dynamic";
 
-export const GET = (_req: Request, { params }: { params: Promise<{ addr: string }> }) =>
+export const GET = (req: Request, { params }: { params: Promise<{ addr: string }> }) =>
   guard(async () => {
     const { addr } = await params;
     if (isLive()) {
-      const live = await liveJson.address(addr);
+      const live = await liveJson.address(addr, new URL(req.url).searchParams.get("type") ?? undefined);
       return live ? ok(live) : fail(404, "address not found");
     }
     const ledger = getLedger();
