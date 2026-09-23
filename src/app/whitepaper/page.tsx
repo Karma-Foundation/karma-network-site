@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Karma: a recognition ledger for the conscious economy. The protocol, its economics, its limits and the questions still open.",
 };
 
-const DRAFT = "0.1";
+const DRAFT = "0.3";
 const AS_OF = { height: "16,559", date: "22 September 2026", pv: 52 };
 
 const TOC: [string, string][] = [
@@ -91,12 +91,15 @@ export default function Whitepaper() {
           <p>
             This paper describes the protocol as it runs on the production network at block {AS_OF.height} ({AS_OF.date}), the economic schedule the Foundation has adopted, and the parts of the design that are decided but not yet deployed. Where a mechanism is planned rather than live, the text says so. The intended readers are protocol researchers, investors, exchanges and partners; each section starts with the claim and follows with the mechanism.
           </p>
+          <p>
+            Two wallets, the Foundation and the Tech Builders, receive Karma from two separate sources, and this paper keeps them apart throughout. The first is the <strong>pre-mine</strong>: 80 million Karma (10 percent of the cap), fixed at genesis to fund the network while it is too small to fund itself, and released daily over five years. The second is the <strong>emission share</strong>: 20 percent of each block (12 percent Foundation, 8 percent Tech Builders), paid for continuing work for as long as the chain emits. Today about 95 percent of what these two wallets have received is pre-mine, and the pre-mine remains the larger of the two sources until around 2058 (section 6). What insiders can move and sell is limited by a treasury policy that locks the exit to the market while leaving the Foundation able to make deals (section 10).
+          </p>
           <div className="stats n6 wp-stats">
             <div className="stat"><div className="l">Hard cap</div><div className="v">800M</div><div className="s">Karma, 0.001 smallest unit</div></div>
             <div className="stat"><div className="l">Block time</div><div className="v">10 min</div><div className="s">144 blocks per day</div></div>
             <div className="stat"><div className="l">To Kreators</div><div className="v">73%</div><div className="s">of every block</div></div>
             <div className="stat"><div className="l">Staking split</div><div className="v">50 / 50</div><div className="s">Kreator / stakers</div></div>
-            <div className="stat"><div className="l">Pre-mine</div><div className="v">10%</div><div className="s">5-year linear vesting</div></div>
+            <div className="stat"><div className="l">Pre-mine (funding)</div><div className="v">10%</div><div className="s">Foundation 6%, Tech Builders 4%, 5-year vesting</div></div>
             <div className="stat"><div className="l">Genesis</div><div className="v">30 May</div><div className="s">2026, block 0</div></div>
           </div>
 
@@ -190,10 +193,55 @@ export default function Whitepaper() {
           <Open>&quot;Permissioned block production plus open verification&quot; is the honest description of the current topology and it should stay that way in the paper. The 2025 consensus specification described five launch runners including three Founding Circle operators; production runs four Foundation nodes. The Founding Circle runners belong in the roadmap, not in the present tense.</Open>
 
           <H2 id="s6" n="06">Economics</H2>
-          <h3>Supply</h3>
+          <h3>Supply and allocation</h3>
+          <p>The hard cap is 800,000,000 Karma. It enters circulation through two channels only, and they serve different purposes.</p>
           <p>
-            The hard cap is 800,000,000 Karma. Ten percent, 80,000,000, was allocated at genesis to two vesting wallets: 48,000,000 (6 percent) to the Foundation treasury and 32,000,000 (4 percent) to the Tech Builders who built the protocol. Both vest linearly over five years, released daily by the protocol itself, and unreleased balances are unspendable. The remaining 720,000,000 can only enter circulation through block emission.
+            <strong>Pre-mine: funding the network.</strong> Ten percent, 80,000,000 Karma, was allocated at genesis to two vesting wallets: 48,000,000 (6 percent) to the Foundation treasury and 32,000,000 (4 percent) to the Tech Builders who built the protocol. This is the network&apos;s start-up funding. It pays for development, operations, growth and liquidity during the years when emission is too small to support them. Both allocations vest linearly over five years, released daily by the protocol itself, and unreleased balances are unspendable. The pre-mine is fixed: it never grows, and it is fully released by mid-2031.
           </p>
+          <p>
+            <strong>Emission: paying for ongoing work.</strong> The remaining 720,000,000 Karma can only enter circulation through block emission. Of each block, 73 percent goes to Kreators and their stakers, 7 percent to validators, and 20 percent to the same two wallets as an ongoing share: 12 percent to the Foundation and 8 percent to the Tech Builders. The emission share is not a second pre-mine. It exists only as blocks are produced, and it follows the same release percent and halvings as the Kreators&apos; pool, so it stays small while the network is small.
+          </p>
+          <div className="tw wp-table">
+            <table>
+              <thead><tr><th></th><th>Pre-mine</th><th>Emission share</th></tr></thead>
+              <tbody>
+                <tr><td>Purpose</td><td>Start-up funding for the network</td><td>Ongoing payment for operating and developing the protocol</td></tr>
+                <tr><td>Size</td><td>80M, fixed (10% of the cap)</td><td>20% of each block; about 144M if the cap is reached</td></tr>
+                <tr><td>Foundation</td><td>48M (6% of the cap)</td><td>12% of each block</td></tr>
+                <tr><td>Tech Builders</td><td>32M (4% of the cap)</td><td>8% of each block</td></tr>
+                <tr><td>How it is released</td><td>Linearly, daily, over five years from genesis</td><td>Every block, scaled by the release percent and the halvings</td></tr>
+                <tr><td>When it ends</td><td>Mid-2031, fully released</td><td>When emission ends</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>Where the Foundation and Tech Builders holdings come from</h3>
+          <p>Because the release percent keeps emission small in the early years, almost everything these two wallets receive during the first decade is pre-mine. At the time of writing:</p>
+          <div className="tw wp-table">
+            <table>
+              <thead><tr><th>Wallet, block 16,559</th><th className="right">Pre-mine released</th><th className="right">Emission share received</th><th className="right">Total received</th><th className="right">From pre-mine</th></tr></thead>
+              <tbody>
+                <tr><td>Foundation</td><td className="right mono">3,023,000</td><td className="right mono">141,000</td><td className="right mono">3,164,000</td><td className="right mono">95.5%</td></tr>
+                <tr><td>Tech Builders</td><td className="right mono">2,015,000</td><td className="right mono">94,000</td><td className="right mono">2,109,000</td><td className="right mono">95.5%</td></tr>
+                <tr><td>Both wallets</td><td className="right mono">5,038,000</td><td className="right mono">235,000</td><td className="right mono">5,273,000</td><td className="right mono">95.5%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>On the floor schedule the balance between the two sources shifts slowly. The pre-mine stops growing in mid-2031; the emission share keeps accruing, but at a rate that falls with each halving.</p>
+          <div className="tw wp-table">
+            <table>
+              <thead><tr><th>Both wallets, floor schedule</th><th className="right">Pre-mine released</th><th className="right">Emission share received</th><th className="right">From pre-mine</th></tr></thead>
+              <tbody>
+                <tr><td>End of 2026</td><td className="right mono">9.4M</td><td className="right mono">0.3M</td><td className="right mono">97%</td></tr>
+                <tr><td>End of 2028</td><td className="right mono">41.4M</td><td className="right mono">5.3M</td><td className="right mono">89%</td></tr>
+                <tr><td>End of 2031, pre-mine fully released</td><td className="right mono">80M</td><td className="right mono">21M</td><td className="right mono">79%</td></tr>
+                <tr><td>End of 2036</td><td className="right mono">80M</td><td className="right mono">34M</td><td className="right mono">70%</td></tr>
+                <tr><td>Around 2058, the two sources are equal</td><td className="right mono">80M</td><td className="right mono">80M</td><td className="right mono">50%</td></tr>
+                <tr><td>At the 800M cap</td><td className="right mono">80M</td><td className="right mono">144M</td><td className="right mono">36%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>The pre-mine therefore explains nearly all of these wallets&apos; holdings for the network&apos;s first decades. The emission share becomes the larger source only in the long tail, more than twenty-five years after the pre-mine has been fully released.</p>
+          <Open>The block 16,559 figures are computed from the vesting schedule (115 daily releases) and total emission, assuming the 12 and 8 percent shares have applied since block 1. They show what each wallet has received, not its current balance. Replace them with values from the supply endpoint before publication, and state whether released pre-mine and emission share land in the same wallet or in separate ones. The projections use the year-end totals of Figure 3.</Open>
           <h3>Emission</h3>
           <p>Every block mints an amount determined by two factors: the <strong>era rate</strong> and the <strong>release percent</strong>.</p>
           <p>
@@ -213,10 +261,10 @@ subject to     release_next - release_now <= 5  and  release_next >= release_now
           <SupplyFig />
           <Open>At the 200 per block tail the chain adds about 10.5 million Karma a year, so the 800 million cap is reached roughly fifty years after the second halving. A reviewer will ask whether the cap is meaningful. Options: state it as an absolute ceiling and let the curve speak; define a final era with a fixed end; or lower the cap.</Open>
           <h3>The four pools</h3>
-          <p>Each block&apos;s emission is split by percentages that are parameters of the protocol and recorded in the block:</p>
+          <p>Each block&apos;s emission is split by percentages that are parameters of the protocol and recorded in the block. The Foundation and Tech Builders percentages below are their emission share only; the pre-mine is separate and never comes out of a block.</p>
           <SplitFig />
           <p>
-            The Foundation and Tech Builders pools are paid to their wallets each block. The Validators pool accrues to a protocol wallet and is not yet distributed; its payout to runners and attesting validators is gated behind a parameter that remains off until the validator programme opens (section 13). Within the Kreators pool, any transaction-reward budget not earned in a block (because too few qualifying transactions occurred) is redirected to that block&apos;s staking rewards rather than burned, a change adopted at protocol version 47. Before it, the unused part burned, which is why 558,386 Karma, nearly half of everything emitted, has been burned to date.
+            The Foundation and Tech Builders pools are paid to their wallets each block, in addition to and separately from the daily pre-mine release. The Validators pool accrues to a protocol wallet and is not yet distributed; its payout to runners and attesting validators is gated behind a parameter that remains off until the validator programme opens (section 13). Within the Kreators pool, any transaction-reward budget not earned in a block (because too few qualifying transactions occurred) is redirected to that block&apos;s staking rewards rather than burned, a change adopted at protocol version 47. Before it, the unused part burned, which is why 558,386 Karma, nearly half of everything emitted, has been burned to date.
           </p>
           <h3>Staking rewards</h3>
           <p>Each block, the staking budget is divided among recognized Kreators by weight:</p>
@@ -304,7 +352,7 @@ reward(k)  = budget x weight(k) / sum of all weights`}</Formula>
           <p>Inbound caps, a minimum outbound amount and a refund grace period were added by the audit remediation at protocol version 52 and default to disabled so that replay of historical blocks is unaffected; they are set before the bridge is switched on.</p>
 
           <H2 id="s10" n="10">Governance</H2>
-          <p>Karma has no token-holder voting. In the current phase the Foundation governs, and this paper says so without decoration. What the protocol does is constrain how the Foundation governs:</p>
+          <p>Karma has no token-holder voting. In the current phase the Foundation governs, and this paper says so without decoration. This is a deliberate choice: the network favours a small, accountable Foundation that can decide and act over maximal decentralization. The concern that follows, that a few people control most of the early supply, is addressed by the treasury policy below. What the protocol does is constrain how the Foundation governs:</p>
           <ul>
             <li><strong>Parameters, not code.</strong> Every economic and consensus tunable is a named parameter with a published minimum and maximum. The pool percentages, the staking split, the fee, the vote thresholds and roughly 130 others are readable by anyone from the public API together with their change history.</li>
             <li><strong>Changes are on the ledger.</strong> A consensus parameter can only change through a signed <span className="mono">config_update</span> envelope included in a block. Direct writes to consensus parameters are refused by the software. The height at which a rule changed is therefore a public fact that every replayer re-applies.</li>
@@ -313,6 +361,37 @@ reward(k)  = budget x weight(k) / sum of all weights`}</Formula>
             <li><strong>Audit log.</strong> Every state change appends to an audit table that the software never updates or deletes.</li>
           </ul>
           <p>Grants from the Foundation pool are discretionary and signed by the Foundation key; each is an envelope in a block. The governance process as it stands is on the <Link href="/governance">governance page</Link>.</p>
+          <h3>Treasury policy: what insiders can move and sell</h3>
+          <p>The principle is to lock the exit to the market, not the Foundation&apos;s ability to act. Locked Karma cannot be sold or bridged out. The Foundation can still make deals of any size with partners, and counterparties receive that Karma under a lock of their own.</p>
+          <div className="tw wp-table">
+            <table>
+              <thead><tr><th>Bucket</th><th>What it holds</th><th>What can leave it</th></tr></thead>
+              <tbody>
+                <tr><td>Foundation Vault</td><td>Released Foundation pre-mine</td><td>Deals to partners, and a monthly allowance to Operating. Nothing goes to the market.</td></tr>
+                <tr><td>Foundation Operating</td><td>A starting balance, the monthly allowance, and the Foundation emission share</td><td>Recorded spending. The only Foundation bucket that can sell, and only within the sale cap.</td></tr>
+                <tr><td>Deals</td><td>Paid from the Vault to a named counterparty</td><td>The counterparty receives it locked: a cliff, then linear release.</td></tr>
+                <tr><td>Tech Builders</td><td>One wallet per member</td><td>Nothing before the cliff; then vested amounts, within a combined sale cap. Each emission-share credit is locked for 12 months.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="tw wp-table">
+            <table>
+              <thead><tr><th>Rule</th><th>Default value</th></tr></thead>
+              <tbody>
+                <tr><td>Cliff</td><td>12 months after the bridge opens</td></tr>
+                <tr><td>Starting Operating balance</td><td>300,000 of released Foundation pre-mine</td></tr>
+                <tr><td>Vault to Operating</td><td>Up to 100,000 a month before the cliff; afterwards the larger of 100,000 or the Vault balance divided by the months left to May 2031</td></tr>
+                <tr><td>Deals</td><td>2 of 3 signers, a public record, 7 days&apos; public notice above 1,000,000, at most 12,000,000 a year</td></tr>
+                <tr><td>Counterparty lock</td><td>6-month cliff, then 12 months linear</td></tr>
+                <tr><td>Sale cap</td><td>10 percent of trailing 30-day market volume, separately for the Foundation and for the Tech Builders combined; zero while no market exists</td></tr>
+                <tr><td>Changing these rules</td><td>2 of 3 signers; tightening takes effect immediately; loosening takes effect 90 days after approval and is announced publicly</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            <strong>Status.</strong> Two of three signers is decided. The other values are defaults under decision and are not yet in effect. Once in effect, the policy is checked daily by a public treasury platform that reconciles every movement of these wallets against an approved record and publishes any movement without one. Enforcement by the protocol itself, through locked balances, locked transfers and outflow limits, is on the roadmap (section 13).
+          </p>
+          <Open>Replace &quot;not yet in effect&quot; with the effective date and link the treasury platform once it is live. Update each value as its decision is made.</Open>
 
           <H2 id="s11" n="11">Security and risk</H2>
           <h3>Threat model</h3>
@@ -349,6 +428,9 @@ reward(k)  = budget x weight(k) / sum of all weights`}</Formula>
           <p>
             Two honest qualifications. First, activity is early: 29 wallets transacted in the trailing 30 days, and 71 transfers moved 4,044 Karma. Second, most stakes on the network today were placed by the Foundation&apos;s bootstrap staker, which seeds 20 to 40 Karma on Kreators that have no backer so that every recognized profile earns from its first block. Both facts are visible on the ledger and neither is hidden by the figures above. The verification layer has already earned its keep: twice in 2026 an independent replayer halted on a block it could not reproduce, in both cases because of a configuration row missing on that replayer rather than a bad block, and in both cases the chain continued and the replayer caught up once the row was added.
           </p>
+          <p>
+            The Foundation and Tech Builders wallets have received about 5.27 million Karma to date. About 5.04 million of it (95.5 percent) is released pre-mine funding and about 0.24 million is their emission share (section 6). Against circulating supply of about 5.65 million (released pre-mine plus emission, less burns), that is about 93 percent, which is what a five-year funding vesting schedule next to a throttled emission produces in its first months. The share falls as emission to Kreators grows and as the release percent rises.
+          </p>
 
           <H2 id="s13" n="13">Roadmap</H2>
           <ol>
@@ -356,8 +438,10 @@ reward(k)  = budget x weight(k) / sum of all weights`}</Formula>
             <li><strong>Founding Circle runners.</strong> Add block producers operated outside the Foundation, each on its own database, so quorum requires non-Foundation signatures.</li>
             <li><strong>Validator programme.</strong> Open attestation to anyone running the validator tool; switch on the Validators pool payout, distributed to attesting validators and runners with a reputation factor for incorrect reports.</li>
             <li><strong>Self-custody.</strong> Enable the wallet-key path; ship a key-export flow so existing users can take custody without a migration.</li>
-            <li><strong>Bridge activation.</strong> Complete the testnet gate, set the inbound caps, switch the bridge on with the published limits.</li>
+            <li><strong>Bridge activation.</strong> Complete the testnet gate, set the inbound caps, switch the bridge on with the published limits. The treasury cliff starts when the bridge opens.</li>
             <li><strong>Governance.</strong> Define which parameters move from Foundation control to a broader process once non-Foundation runners exist.</li>
+            <li><strong>Treasury platform.</strong> Launch the public treasury platform: supply map, control map, deals, and daily reconciliation of the Foundation and Tech Builders wallets.</li>
+            <li><strong>Protocol-enforced locks.</strong> Move the treasury rules into the protocol: locked balances, locked transfers for deals, outflow limits, timelocked loosening, and a 2 of 3 multisig on the Vault.</li>
           </ol>
 
           <H2 id="sA" n="A">Appendix A: parameters</H2>
@@ -371,8 +455,8 @@ reward(k)  = budget x weight(k) / sum of all weights`}</Formula>
                   ["Era rates", "800 / 400 / 200", "fixed", "Karma per block per era"],
                   ["emission_release_pct", "5", "1 to 100", "Since block 12,833"],
                   ["emission_builders_pct", "73", "50 to 95", "Kreators pool"],
-                  ["emission_foundation_pct", "12", "0 to 30", ""],
-                  ["emission_tech_builders_pct", "8", "0 to 20", ""],
+                  ["emission_foundation_pct", "12", "0 to 30", "Emission share; separate from the 48M pre-mine"],
+                  ["emission_tech_builders_pct", "8", "0 to 20", "Emission share; separate from the 32M pre-mine"],
                   ["emission_validators_pct", "7", "0 to 15", "Computed as the remainder"],
                   ["builders_pool_tx_share", "75", "50 to 90", ""],
                   ["builders_pool_staking_share", "25", "10 to 50", ""],
@@ -436,6 +520,12 @@ reward(k)  = budget x weight(k) / sum of all weights`}</Formula>
             <dt>Runner</dt><dd>A block producer with a registered key.</dd>
             <dt>Observer / validator</dt><dd>A node that re-derives blocks from public data and cosigns or reports; may hold its own database.</dd>
             <dt>tx_set_hash / state_hash</dt><dd>The two per-block commitments: what was included, and what the state became.</dd>
+            <dt>Pre-mine</dt><dd>The 80M Karma allocated at genesis to the Foundation (48M) and Tech Builders (32M) to fund the network; fixed, released daily over five years.</dd>
+            <dt>Emission share</dt><dd>The 20 percent of each block paid to the Foundation (12) and Tech Builders (8) for ongoing work; separate from the pre-mine.</dd>
+            <dt>Cliff</dt><dd>The date before which locked insider Karma cannot be sold or moved to the market; 12 months after the bridge opens by default.</dd>
+            <dt>Vault</dt><dd>The locked Foundation bucket holding released pre-mine; it can fund deals and a monthly allowance, never market sales.</dd>
+            <dt>Operating</dt><dd>The Foundation&apos;s liquid bucket; the only Foundation bucket that can sell, within the sale cap.</dd>
+            <dt>Sale cap</dt><dd>The most insiders may sell: 10 percent of trailing 30-day market volume by default, zero while no market exists.</dd>
             <dt>Release percent</dt><dd>The throttle applied to the era rate; the protocol&apos;s adoption ramp.</dd>
             <dt>Era</dt><dd>A span of emission at one rate (800, 400, 200 per block), measured in Karma emitted.</dd>
             <dt>Builder wallet</dt><dd>The wallet owned by a Kreator profile, spendable after claiming.</dd>

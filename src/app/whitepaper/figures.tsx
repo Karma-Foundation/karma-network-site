@@ -106,7 +106,7 @@ export function SupplyFig() {
   const y = (m: number) => 270 - (m / 250) * 240;
   const pts = (a: number[]) => a.map((m, i) => `${x(i)},${y(m).toFixed(1)}`).join(" ");
   return (
-    <Fig viewBox="0 0 720 300" label="Projected total supply from 2026 to 2036 under the floor schedule, rising from 11 million to about 248 million, with the first halving near the end of 2030." caption="Figure 3. Projected total supply under the floor release schedule, with no growth acceleration. Year-end values: 11M (2026), 36M (2027), 68M (2028), 109M (2029), 158M (2030), 185M (2031), 206M (2032), then about 10.5M a year at the 200 per block tail.">
+    <Fig viewBox="0 0 720 300" label="Projected total supply from 2026 to 2036 under the floor schedule, rising from 11 million to about 248 million, with the first halving near the end of 2030." caption="Figure 3. Projected total supply under the floor release schedule, with no growth acceleration. Year-end values: 11M (2026), 36M (2027), 68M (2028), 109M (2029), 158M (2030), 185M (2031), 206M (2032), then about 10.5M a year at the 200 per block tail. The dashed line is released pre-mine; the gap between the two lines is emission, of which 20 percent is the Foundation and Tech Builders emission share.">
       <g stroke="currentColor" strokeOpacity={0.5}>
         <line x1={60} y1={270} x2={700} y2={270} />
         <line x1={60} y1={30} x2={60} y2={270} />
