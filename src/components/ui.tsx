@@ -244,7 +244,8 @@ export function DocCards({ specTitle }: { specTitle?: string } = {}) {
   const d: [string, string, string][] = [
     [specTitle ?? `Protocol specification ${SPEC_VERSION}`, "Issuance schedule, distribution, reward formula, signature scheme", "/protocol"],
     ["Source code", "Protocol node, open repository, release tags per version", "/documents"],
-    ["Whitepaper", "Why the protocol exists and what it rewards", "/why"],
+    ["Whitepaper", "The protocol, its economics, its limits and the questions still open", "/whitepaper"],
+    ["Why", "Why the protocol exists, what it rewards, what it refuses to do", "/why"],
     ["Governance framework", "Elections, recall, upgrade process, signer duties", "/governance"],
     ["Run a node", "Requirements, setup, current runner list", "/runners"],
   ];
