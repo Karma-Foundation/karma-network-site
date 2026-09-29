@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { CopyButton } from "@/components/CopyButton";
 import { Crumb, LedgerTabs } from "@/components/ui";
 import { KD, ago, dateStr, fmt, isoMs, pctDec, short, shortTx, timeStr } from "@/lib/format";
-import { ADDRESS_RE, TX_ID_RE, address, addresses, block, blocks, isLiveTxType, mempoolTo, overview, protocolWallets, runnerSigners, supplyIdentity, transactions, txById, type LiveTxType } from "@/lib/ledger/live/data";
+import { ADDRESS_RE, TX_ID_RE, address, addresses, block, blocks, hasUnlistedCredits, isLiveTxType, mempoolTo, overview, protocolWallets, runnerSigners, supplyIdentity, transactions, txById, type LiveTxType } from "@/lib/ledger/live/data";
 import { Tabs } from "@/components/ui";
 import { LiveAddr, LiveTxTable, RankedTable, SimplePager, txTypeLabel } from "./parts";
 
@@ -95,6 +95,7 @@ export async function LiveAddress({ addr: raw, page, type: rawType }: { addr: st
   const [d, pending, pw, sup] = await Promise.all([address(addr, ADDR_TXS, (page - 1) * ADDR_TXS, type), mempoolTo(addr), protocolWallets(), supplyIdentity()]);
   if (!d) notFound();
   const label = pw.labels[addr];
+  const unlisted = await hasUnlistedCredits(d);
   const pools = pw.pools.filter((p) => p.public_address === addr);
   const pre = pw.preMine.filter((p) => p.public_address === addr);
   const unseen = d.tx_count === 0 && d.balance === "0.000" && !d.first_seen;
@@ -119,6 +120,13 @@ export async function LiveAddress({ addr: raw, page, type: rawType }: { addr: st
       </div>
       {unseen && <div className="note" style={{ borderColor: "var(--muted)", color: "var(--muted)" }}>This address has never appeared on the ledger.</div>}
       {pools.map((p) => <p key={p.name} className="body f14" style={{ maxWidth: 720, margin: "0 0 16px" }}>Receives the {p.label} share of every block&apos;s emission. <Link href="/wallets">Protocol wallets →</Link></p>)}
+      {unlisted !== false && !unseen && (
+        <div className="note" style={{ borderColor: "var(--muted)", color: "var(--body)" }}>
+          {unlisted
+            ? "Part of this balance came from credits the ledger does not list as transactions yet: staking and transaction rewards, invite and review payments, and for pool wallets their share of each block and the pre-mine release. The history below shows transfers, grants, stakes and unstakes only."
+            : "The history below shows transfers, grants, stakes and unstakes only. Credits such as staking and transaction rewards, invite and review payments, block emission shares and pre-mine release are not listed as transactions yet."}
+        </div>
+      )}
       <div className="stats n4">
         <div className="stat"><div className="l">Balance</div><div className="v">{KD(d.balance)}</div><div className="s">{pctDec(d.balance, sup.total_in_wallets, 3)} of all Karma in wallets</div></div>
         <div className="stat"><div className="l">Staked</div><div className="v">{KD(d.staked)}</div><div className="s">on Kreators</div></div>

@@ -25,3 +25,15 @@ describe("fmtDec", () => {
     expect(fmtDec(null)).toBe("-");
   });
 });
+
+describe("milli (exact thousandths, no floats)", () => {
+  it("parses 3dp decimal strings exactly", async () => {
+    const { milli } = await import("../live/data");
+    expect(milli("4529.115")).toBe(BigInt(4529115));
+    expect(milli("0.015")).toBe(BigInt(15));
+    expect(milli("30")).toBe(BigInt(30000));
+    expect(milli("29.2")).toBe(BigInt(29200));
+    expect(milli("9007199254740993.001")).toBe(BigInt("9007199254740993001"));
+    expect(milli(null)).toBe(BigInt(0));
+  });
+});
