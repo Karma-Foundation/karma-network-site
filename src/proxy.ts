@@ -10,6 +10,12 @@ import { NextResponse, type NextRequest } from "next/server";
  * the browser sends it on same-origin fetches, so the block pill keeps working.
  *
  * Unset SITE_PASSWORD to open the site (local dev runs open by default).
+ *
+ * Review hosts: REVIEW_HOSTS is a comma-separated list of hostnames that skip the password,
+ * for handing the site to reviewers (including browsing agents that cannot send a password)
+ * without giving out the password. Each is a random, unlisted address; it is kept only in the
+ * host's environment, never in this public repo, and removing it closes access at once. Every
+ * response on a review host carries noindex, and its robots.txt disallows everything.
  */
 
 const digest = (s: string) => createHash("sha256").update(s).digest();
@@ -25,7 +31,23 @@ function passwordFrom(header: string | null): string | null {
   }
 }
 
+const reviewHosts = (): Set<string> =>
+  new Set((process.env.REVIEW_HOSTS ?? "").split(",").map((h) => h.trim().toLowerCase()).filter(Boolean));
+
+function requestHost(req: NextRequest): string {
+  const raw = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? "";
+  return raw.split(",")[0].trim().toLowerCase().replace(/:\d+$/, "");
+}
+
 export function proxy(req: NextRequest) {
+  if (reviewHosts().has(requestHost(req))) {
+    if (req.nextUrl.pathname === "/robots.txt") {
+      return new NextResponse("User-agent: *\nDisallow: /\n", { headers: { "Content-Type": "text/plain", "X-Robots-Tag": "noindex, nofollow" } });
+    }
+    const res = NextResponse.next();
+    res.headers.set("X-Robots-Tag", "noindex, nofollow");
+    return res;
+  }
   const expected = process.env.SITE_PASSWORD;
   if (!expected) return NextResponse.next();
   const given = passwordFrom(req.headers.get("authorization"));
