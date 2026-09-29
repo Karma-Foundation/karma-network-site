@@ -15,7 +15,9 @@ import { NextResponse, type NextRequest } from "next/server";
  * for handing the site to reviewers (including browsing agents that cannot send a password)
  * without giving out the password. Each is a random, unlisted address; it is kept only in the
  * host's environment, never in this public repo, and removing it closes access at once. Every
- * response on a review host carries noindex, and its robots.txt disallows everything.
+ * response on a review host carries noindex, nofollow, which keeps it out of search results.
+ * Its robots.txt ALLOWS everything: review agents obey robots.txt, and a Disallow would also
+ * stop crawlers from ever seeing the noindex header.
  */
 
 const digest = (s: string) => createHash("sha256").update(s).digest();
@@ -42,7 +44,7 @@ function requestHost(req: NextRequest): string {
 export function proxy(req: NextRequest) {
   if (reviewHosts().has(requestHost(req))) {
     if (req.nextUrl.pathname === "/robots.txt") {
-      return new NextResponse("User-agent: *\nDisallow: /\n", { headers: { "Content-Type": "text/plain", "X-Robots-Tag": "noindex, nofollow" } });
+      return new NextResponse("User-agent: *\nAllow: /\n", { headers: { "Content-Type": "text/plain", "X-Robots-Tag": "noindex, nofollow" } });
     }
     const res = NextResponse.next();
     res.headers.set("X-Robots-Tag", "noindex, nofollow");
