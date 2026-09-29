@@ -29,8 +29,8 @@ are self-hosted at build time by `next/font`, so the browser makes no third-part
 
 | Env | Default | Meaning |
 |---|---|---|
-| `LEDGER_MODE` | `mock` | `mock` (seeded simulation) or `rpc` (live ledger, see "Live mode"). Production runs `rpc`. |
-| `SHOW_DUMMY_BANNER` | on | The banner shows unless this is exactly `false`. A missing variable fails safe. |
+| `LEDGER_MODE` | live | The site reads the live ledger unless this is exactly `mock`, which runs the seeded simulation for design work and tests. A missing variable can never bring dummy data back. |
+| `SHOW_DUMMY_BANNER` | - | Retired. The simulation banner now shows exactly when `LEDGER_MODE=mock` and cannot be switched off in that mode. |
 | `LEDGER_RPC_URL` | `https://chain.karmaterminal.com/api/v1/public` | Base of the ledger's public API, used in `rpc` mode. |
 | `SITE_PASSWORD` | unset | When set, the whole site (pages and `/api/v1`) answers 401 until the visitor enters this password (HTTP Basic auth, any username). Set it on the host only. This repo is public: never commit the value. Unset it to open the site. |
 

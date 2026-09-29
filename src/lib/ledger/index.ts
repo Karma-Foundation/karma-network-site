@@ -6,11 +6,12 @@ import type { LedgerSource } from "./source";
 let instance: LedgerSource | null = null;
 
 export function getLedger(): LedgerSource {
-  if (!instance) instance = process.env.LEDGER_MODE === "rpc" ? new RpcLedger() : new MockLedger();
+  if (!instance) instance = isLive() ? new RpcLedger() : new MockLedger();
   return instance;
 }
 
-export const isLive = (): boolean => process.env.LEDGER_MODE === "rpc";
+/** Live is the default. The seeded simulation runs only when LEDGER_MODE is exactly "mock". */
+export const isLive = (): boolean => process.env.LEDGER_MODE !== "mock";
 
 /** Height for the nav pill. Never throws: a dead ledger must not take the whole layout down. */
 export async function currentHeight(): Promise<number | null> {
@@ -22,8 +23,8 @@ export async function currentHeight(): Promise<number | null> {
   }
 }
 
-/** Fails safe: the banner shows unless the env var is exactly "false". */
-export const showDummyBanner = (): boolean => process.env.SHOW_DUMMY_BANNER !== "false";
+/** The simulation banner is tied to the mode, not to a flag: dummy data can never show without it. */
+export const showDummyBanner = (): boolean => !isLive();
 
 export * from "./types";
 export * from "./source";

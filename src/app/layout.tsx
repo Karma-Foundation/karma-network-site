@@ -3,8 +3,8 @@ import { IBM_Plex_Mono, IBM_Plex_Sans, Libre_Caslon_Text } from "next/font/googl
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { currentHeight, isLive, showDummyBanner } from "@/lib/ledger";
-import { BANNER_TEXT, LIVE_BANNER_TEXT } from "@/lib/site";
+import { currentHeight, showDummyBanner } from "@/lib/ledger";
+import { BANNER_TEXT } from "@/lib/site";
 import "./globals.css";
 
 const serif = Libre_Caslon_Text({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-serif", display: "swap" });
@@ -32,7 +32,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Nav initialHeight={height} />
         {showDummyBanner() && (
           <div className="wrap banner">
-            <div className="note" role="note">{isLive() ? LIVE_BANNER_TEXT : BANNER_TEXT}</div>
+            <div className="note" role="note">{BANNER_TEXT}</div>
           </div>
         )}
         <main>{children}</main>
