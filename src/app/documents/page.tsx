@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import { DocCards } from "@/components/ui";
+import { isLive } from "@/lib/ledger";
+import { ledgerBase } from "@/lib/ledger/live/api";
 
 export const metadata: Metadata = { title: "Documents" };
 
+export const dynamic = "force-dynamic";
+
 export default function Documents() {
+  if (isLive()) return <LiveDocuments />;
   return (
     <div className="wrap page">
       <div className="kicker">Documents</div>
@@ -17,6 +22,34 @@ export default function Documents() {
           <div className="k">Endpoints</div><div className="mono" style={{ whiteSpace: "normal" }}>/blocks · /blocks/{"{n}"} · /tx/{"{id}"} · /addresses · /addresses/{"{addr}"} · /supply · /runners · /upgrades</div>
           <div className="k">Auth</div><div className="mono">none · read-only · rate limit 60 requests/minute</div>
           <div className="k">Export</div><div className="mono">any table on this site as CSV, any address history as CSV</div>
+        </div>
+      </div>
+      <div className="section">
+        <h2 style={{ marginBottom: 16 }}>Contact</h2>
+        <div className="panel rows">
+          <div className="k">Protocol questions</div><div className="mono">[EMAIL]</div>
+          <div className="k">Security disclosure</div><div className="mono">[EMAIL] · PGP key [LINK]</div>
+          <div className="k">Press</div><div className="mono">[EMAIL]</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LiveDocuments() {
+  return (
+    <div className="wrap page">
+      <div className="kicker">Documents</div>
+      <h1>Read the source</h1>
+      <p className="lede" style={{ margin: "16px 0 32px" }}>Every figure on this site is read from the ledger&apos;s public API and can be checked against it directly.</p>
+      <DocCards live />
+      <div className="section" style={{ marginTop: 48 }}>
+        <h2 style={{ marginBottom: 16 }}>Ledger API</h2>
+        <div className="panel rows">
+          <div className="k">Base</div><div className="mono break">{ledgerBase()}</div>
+          <div className="k">Endpoints</div><div className="mono" style={{ whiteSpace: "normal" }}>/supply · /network/overview · /blocks · /blocks/{"{n}"} · /blocks/{"{n}"}/rewards · /transactions · /transactions/{"{id}"} · /addresses · /addresses/{"{addr}"} · /protocol-wallets · /parameters · /parameters/history · /runners/active · /validators</div>
+          <div className="k">Auth</div><div className="mono">none · read-only · amounts are decimal strings with three places</div>
+          <div className="k">Operated by</div><div className="mono">the protocol, not this site. This site adds nothing to what it serves.</div>
         </div>
       </div>
       <div className="section">

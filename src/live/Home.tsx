@@ -155,7 +155,7 @@ export async function LiveHome() {
           <h2>Read the source</h2>
           <p className="body">Everything above can be checked against the ledger itself.</p>
         </div>
-        <DocCards specTitle="Protocol rules" />
+        <DocCards live />
       </div>
     </div>
   );
