@@ -33,7 +33,7 @@ are self-hosted at build time by `next/font`, so the browser makes no third-part
 | `SHOW_DUMMY_BANNER` | - | Retired. The simulation banner now shows exactly when `LEDGER_MODE=mock` and cannot be switched off in that mode. |
 | `LEDGER_RPC_URL` | `https://chain.karmaterminal.com/api/v1/public` | Base of the ledger's public API, used in `rpc` mode. |
 | `SITE_PASSWORD` | unset | When set, the whole site (pages and `/api/v1`) answers 401 until the visitor enters this password (HTTP Basic auth, any username). Set it on the host only. This repo is public: never commit the value. Unset it to open the site. |
-| `REVIEW_HOSTS` | unset | Comma-separated hostnames that skip the password, for reviewers who cannot send one. Each is a random unlisted address kept only on the host, never in this repo. Responses there carry `noindex`; its robots.txt disallows everything. Remove a host to close access. |
+| `REVIEW_HOSTS` | unset | Comma-separated hostnames that skip the password, for reviewers who cannot send one. Each is a random unlisted address kept only on the host, never in this repo. Responses there carry `noindex, nofollow`; its robots.txt allows everything, because review agents obey robots.txt. Remove a host to close access. |
 
 ## Layout
 
