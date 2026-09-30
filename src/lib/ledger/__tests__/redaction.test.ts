@@ -37,3 +37,14 @@ describe("milli (exact thousandths, no floats)", () => {
     expect(milli(null)).toBe(BigInt(0));
   });
 });
+
+describe("addDec (exact decimal sums)", () => {
+  it("adds 3dp strings without float error", async () => {
+    const { addDec } = await import("../live/data");
+    expect(addDec("4420.536", "0.000")).toBe("4420.536");
+    expect(addDec("0.1", "0.2")).toBe("0.300");
+    expect(addDec("-112439.967", "112439.967")).toBe("0.000");
+    expect(addDec("1.005", "-2")).toBe("-0.995");
+    expect(addDec(null, undefined)).toBe("0.000");
+  });
+});

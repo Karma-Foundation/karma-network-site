@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { CopyButton } from "@/components/CopyButton";
 import { Crumb, LedgerTabs } from "@/components/ui";
 import { KD, ago, dateStr, fmt, isoMs, pctDec, short, shortTx, timeStr } from "@/lib/format";
-import { ADDRESS_RE, TX_ID_RE, address, addresses, block, blocks, hasUnlistedCredits, isLiveTxType, mempoolTo, overview, protocolWallets, runnerSigners, supplyIdentity, transactions, txById, type LiveTxType } from "@/lib/ledger/live/data";
+import { type AddressDetail, ADDRESS_RE, TX_ID_RE, addDec, address, addresses, block, blocks, isLiveTxType, mempoolTo, overview, protocolWallets, runnerSigners, supplyIdentity, transactions, txById, type LiveTxType } from "@/lib/ledger/live/data";
 import { Tabs } from "@/components/ui";
 import { LiveAddr, LiveTxTable, RankedTable, SimplePager, txTypeLabel } from "./parts";
 
@@ -88,6 +88,61 @@ export async function LiveAddresses({ page }: { page: number }) {
 }
 
 const ADDR_TXS = 40;
+
+const CREDIT_ROWS: [string, (c: NonNullable<AddressDetail["credits"]>) => string | undefined | null][] = [
+  ["Transfers received", (c) => c.transfers_received],
+  ["Share of transfer fees", (c) => c.transfer_fee_share],
+  ["Staking rewards", (c) => addDec(c.staking_rewards_builder, c.staking_rewards_staker)],
+  ["Transaction rewards", (c) => c.transaction_rewards],
+  ["Discovery rewards", (c) => c.discovery_rewards],
+  ["Invite rewards", (c) => c.invite_rewards],
+  ["Welcome grants", (c) => c.welcome_grants],
+  ["Other grants", (c) => c.other_grants],
+  ["Pre-mine release", (c) => c.pre_mine_release],
+];
+const nonZero = (v: string | null | undefined): v is string => !!v && !/^-?0(\.0+)?$/.test(v);
+
+function Row({ k, v, strong, sign }: { k: string; v: string; strong?: boolean; sign?: string }) {
+  return <tr><td className={strong ? "fw5" : undefined}>{k}</td><td className={`right mono${strong ? " fw5" : ""}`}>{sign}{KD(v)}</td></tr>;
+}
+
+/** Where the balance came from, as the ledger itemises it (Karma-Protocol #697). */
+function Breakdown({ d, pool }: { d: AddressDetail; pool: boolean }) {
+  const c = d.credits;
+  const db = d.debits;
+  if (!c || !db) {
+    if (c === undefined) return null;
+    return <div className="note" style={{ borderColor: "var(--muted)", color: "var(--body)" }}>The ledger could not itemise this balance right now.</div>;
+  }
+  const pick = (rows: [string, string | null | undefined][]): [string, string][] => rows.flatMap(([k, v]) => (nonZero(v) ? [[k, v] as [string, string]] : []));
+  const credits = pick(CREDIT_ROWS.map(([k, f]) => [k, f(c)]));
+  const debits = pick([["Transfers sent", db.transfers_sent], ["Fees paid", db.fees_paid]]);
+  const un = d.unattributed ?? null;
+  return (
+    <div className="section" style={{ marginTop: 32 }}>
+      <h2 style={{ marginBottom: 12 }}>Where this balance came from</h2>
+      <div className="panel tw">
+        <table>
+          <tbody>
+            {credits.map(([k, v]) => <Row key={k} k={k} v={v} />)}
+            <Row k="Total received" v={c.total ?? "0.000"} strong />
+            {debits.map(([k, v]) => <Row key={k} k={k} v={v} sign="- " />)}
+            {debits.length > 0 && <Row k="Total sent" v={db.total ?? "0.000"} strong sign="- " />}
+            {nonZero(un) && <Row k="Not itemised by the ledger" v={un} />}
+            <Row k="Held now (balance, staked and in cooldown)" v={d.holdings ?? addDec(d.balance, d.staked)} strong />
+          </tbody>
+        </table>
+      </div>
+      {nonZero(un) && (
+        <p className="muted f13" style={{ marginTop: 10 }}>
+          {pool
+            ? "This is a protocol pool wallet. Its share of each block's emission and the payouts it makes are not itemised by the ledger yet, so they appear here as one figure."
+            : "The ledger does not itemise this part yet. For wallets that staked before 17 July 2026 it is mostly staking rewards settled before the ledger began recording them per wallet."}
+        </p>
+      )}
+    </div>
+  );
+}
 export async function LiveAddress({ addr: raw, page, type: rawType }: { addr: string; page: number; type?: string }) {
   const addr = raw.toLowerCase();
   if (!ADDRESS_RE.test(addr)) notFound();
@@ -95,7 +150,6 @@ export async function LiveAddress({ addr: raw, page, type: rawType }: { addr: st
   const [d, pending, pw, sup] = await Promise.all([address(addr, ADDR_TXS, (page - 1) * ADDR_TXS, type), mempoolTo(addr), protocolWallets(), supplyIdentity()]);
   if (!d) notFound();
   const label = pw.labels[addr];
-  const unlisted = await hasUnlistedCredits(d);
   const pools = pw.pools.filter((p) => p.public_address === addr);
   const pre = pw.preMine.filter((p) => p.public_address === addr);
   const unseen = d.tx_count === 0 && d.balance === "0.000" && !d.first_seen;
@@ -120,19 +174,13 @@ export async function LiveAddress({ addr: raw, page, type: rawType }: { addr: st
       </div>
       {unseen && <div className="note" style={{ borderColor: "var(--muted)", color: "var(--muted)" }}>This address has never appeared on the ledger.</div>}
       {pools.map((p) => <p key={p.name} className="body f14" style={{ maxWidth: 720, margin: "0 0 16px" }}>Receives the {p.label} share of every block&apos;s emission. <Link href="/wallets">Protocol wallets →</Link></p>)}
-      {unlisted !== false && !unseen && (
-        <div className="note" style={{ borderColor: "var(--muted)", color: "var(--body)" }}>
-          {unlisted
-            ? "Part of this balance came from credits the ledger does not list as transactions yet: staking and transaction rewards, invite and review payments, and for pool wallets their share of each block and the pre-mine release. The history below shows transfers, grants, stakes and unstakes only."
-            : "The history below shows transfers, grants, stakes and unstakes only. Credits such as staking and transaction rewards, invite and review payments, block emission shares and pre-mine release are not listed as transactions yet."}
-        </div>
-      )}
       <div className="stats n4">
         <div className="stat"><div className="l">Balance</div><div className="v">{KD(d.balance)}</div><div className="s">{pctDec(d.balance, sup.total_in_wallets, 3)} of all Karma in wallets</div></div>
         <div className="stat"><div className="l">Staked</div><div className="v">{KD(d.staked)}</div><div className="s">on Kreators</div></div>
         <div className="stat"><div className="l">First seen</div><div className="v">{d.first_seen ? dateStr(isoMs(d.first_seen)) : "-"}</div><div className="s">{d.first_seen ? ago(isoMs(d.first_seen)) : "never"}</div></div>
         <div className="stat"><div className="l">Transactions</div><div className="v">{fmt(d.tx_count)}</div><div className="s">transfers, grants, stakes, unstakes</div></div>
       </div>
+      {!unseen && <Breakdown d={d} pool={pools.length > 0} />}
       {pre.length > 0 && (
         <div className="section" style={{ marginTop: 32 }}>
           <h2 style={{ marginBottom: 12 }}>Pre-mine allocation</h2>
