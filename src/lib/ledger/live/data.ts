@@ -110,40 +110,37 @@ export async function addresses(limit: number, offset: number): Promise<RankedAd
   return asArray<RankedAddress>(await get<unknown>(`/addresses?limit=${limit}&offset=${offset}`, 60));
 }
 
-export interface AddressDetail { public_address: string; balance: string; staked: string; first_seen: string | null; tx_count: number; transactions: LiveTx[] }
+export interface Credits {
+  transfers_received?: string; transfer_fee_share?: string; discovery_rewards?: string; welcome_grants?: string; invite_rewards?: string;
+  other_grants?: string; staking_rewards_builder?: string; staking_rewards_staker?: string; transaction_rewards?: string; pre_mine_release?: string; total?: string;
+}
+export interface Debits { transfers_sent?: string; fees_paid?: string; total?: string }
+export interface AddressDetail {
+  public_address: string; balance: string; staked: string; first_seen: string | null; tx_count: number; transactions: LiveTx[];
+  /** Karma-Protocol #697. Null when the ledger could not compute them; absent on older API versions. */
+  credits?: Credits | null; debits?: Debits | null; rewards_received?: string | null; holdings?: string | null; unattributed?: string | null;
+}
 export async function address(addr: string, limit: number, offset: number, type?: LiveTxType): Promise<AddressDetail | null> {
   const q = `limit=${limit}&offset=${offset}${type ? `&type=${type}` : ""}`;
   const d = await getOrNull<AddressDetail>(`/addresses/${addr}?${q}`, 60);
   return d ? { ...d, transactions: asArray<LiveTx>(d.transactions) } : null;
 }
 
-/**
- * Whether an address's balance holds credits its listed history does not explain.
- *
- * The public history lists transfers, grants, stakes and unstakes only. Stakes and unstakes
- * move Karma between balance and stake (a cooldown only lowers both), and outgoing transfers
- * and fees only lower them, so balance + staked can never exceed what was received as listed
- * transfers and grants. If it does, the difference came from credits the ledger does not list
- * yet (rewards, invite and review payments, pool emission, pre-mine release). Integer math on
- * thousandths, never floats. Returns null when the history is too long to read in full.
- */
-const HISTORY_PAGE = 100;
-const HISTORY_MAX_PAGES = 20;
+/** Exact thousandths from a 3dp decimal string. Never floats. */
 export const milli = (s: string | null | undefined): bigint => {
   const m = /^(-?)(\d+)(?:\.(\d{1,3}))?/.exec(String(s ?? "0"));
   if (!m) return BigInt(0);
   const v = BigInt(m[2]) * BigInt(1000) + BigInt((m[3] ?? "").padEnd(3, "0") || "0");
   return m[1] ? -v : v;
 };
-export async function hasUnlistedCredits(d: AddressDetail): Promise<boolean | null> {
-  const held = milli(d.balance) + milli(d.staked);
-  if (held <= BigInt(0)) return false;
-  const pages = Math.ceil(d.tx_count / HISTORY_PAGE);
-  if (pages > HISTORY_MAX_PAGES) return null;
-  const all = pages === 0 ? [] : (await Promise.all(Array.from({ length: pages }, (_, i) => address(d.public_address, HISTORY_PAGE, i * HISTORY_PAGE)))).flatMap((x) => x?.transactions ?? []);
-  let received = BigInt(0);
-  for (const t of all) if ((t.type === "transfer" || t.type === "grant") && t.receiver_address === d.public_address) received += milli(t.amount);
-  return held > received;
+/** Sum of decimal strings, exact, back to a 3dp string. */
+export function addDec(...xs: (string | null | undefined)[]): string {
+  const v = xs.reduce((acc, x) => acc + milli(x), BigInt(0));
+  const neg = v < BigInt(0);
+  const a = neg ? -v : v;
+  const whole = a / BigInt(1000);
+  const frac = (a % BigInt(1000)).toString().padStart(3, "0");
+  return `${neg ? "-" : ""}${whole}.${frac}`;
 }
 
 export interface Pool { name: string; label: string; public_address: string }
