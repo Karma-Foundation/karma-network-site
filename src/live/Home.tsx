@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { DocCards } from "@/components/ui";
 import { KD, ago, dateStr, fmt, fmtDec, isoMs, pctDec } from "@/lib/format";
-import { MAX_SUPPLY, addresses, eraOf, genesis, history, overview, paramMap, protocolWallets, runners, supplyIdentity, blocks } from "@/lib/ledger/live/data";
-import { ChangeTable, RankedTable, ShareBarsLive, shareRows } from "./parts";
+import { MAX_SUPPLY, addresses, eraRateNow, genesis, halvingRule, history, overview, paramMap, protocolWallets, runners, supplyIdentity, blocks } from "@/lib/ledger/live/data";
+import { ChangeTable, HalvingSentence, RankedTable, ShareBarsLive, shareRows } from "./parts";
 
 export async function LiveHome() {
   const [ov, sup, p, rs, hist, gen, latest, top, pw] = await Promise.all([overview(), supplyIdentity(), paramMap(), runners(), history(), genesis(), blocks(1, 0), addresses(10, 0), protocolWallets()]);
@@ -11,7 +11,8 @@ export async function LiveHome() {
   const poolHeld = sum(top.filter((a) => pw.labels[a.public_address]).map((a) => a.balance));
   const top10 = sum(top.map((a) => a.balance));
   const lb = ov.chain.latest_block;
-  const era = eraOf(lb.height);
+  const rule = halvingRule(p);
+  const eraRate = eraRateNow(rule, lb.height, sup.total_emitted);
   const perBlock = latest[0]?.emission_amount ?? null;
   const active = rs.filter((r) => !r.stale).length;
   return (
@@ -46,7 +47,7 @@ export async function LiveHome() {
         <div className="panel rows">
           <div className="k">Maximum supply</div><div className="mono">{KD(MAX_SUPPLY)}</div>
           <div className="k">Block time</div><div className="mono">{ov.chain.block_interval_seconds / 60} minutes</div>
-          <div className="k">Issuance</div><div className="mono">{perBlock ? KD(perBlock) : "-"} per block now: the era rate of {era.fullRate} к, released at {p.emission_release_pct ?? "-"}%. The era rate halves after blocks 105,119 and 210,239.</div>
+          <div className="k">Issuance</div><div className="mono">{perBlock ? KD(perBlock) : "-"} per block now: the era rate of {eraRate ?? "-"} к, released at {p.emission_release_pct ?? "-"}%. <HalvingSentence rule={rule} /></div>
           <div className="k">Distribution per block</div><div><ShareBarsLive rows={shareRows(p)} /></div>
           <div className="k">Transfer fee</div><div className="mono">{p.transaction_fee_pct ?? "-"}% of the amount; {p.fee_burn_ratio ?? "-"}% of the fee is burned</div>
           <div className="k">Changing the rules</div><div className="mono">Parameters change only by an on-ledger config update that every runner replays. <Link href="/governance">Every change is logged.</Link></div>

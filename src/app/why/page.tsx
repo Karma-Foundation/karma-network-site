@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Crumb } from "@/components/ui";
 
+// The prose is static, but the header block badge must come from the live ledger
+// snapshot like every other page (audit item 29), so this renders per request.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "Why" };
 
 export default function Why() {

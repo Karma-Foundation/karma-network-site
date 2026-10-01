@@ -19,6 +19,35 @@ export const ERAS = [
 ] as const;
 export const eraOf = (height: number) => ERAS.find((e) => e.upTo === null || height <= e.upTo)!;
 
+/*
+ * Which halving rule the chain is on (audit item 7). Since 23 Sep 2026 the ledger halves by
+ * Karma EMITTED, not by block height: cumulative_halving_enabled = true with two thresholds.
+ * Read from the parameters API, never hardcoded, so the copy follows the chain.
+ */
+export type HalvingRule =
+  | { kind: "emitted"; thresholds: [string, string] }
+  | { kind: "height" }
+  | { kind: "unknown" };
+
+const DEC_RE = /^\d+(\.\d+)?$/;
+export function halvingRule(p: Record<string, string | undefined>): HalvingRule {
+  if (p.cumulative_halving_enabled !== "true") return { kind: "height" };
+  const t1 = p.cumulative_halving_threshold_1;
+  const t2 = p.cumulative_halving_threshold_2;
+  if (!t1 || !t2 || !DEC_RE.test(t1) || !DEC_RE.test(t2)) return { kind: "unknown" };
+  return { kind: "emitted", thresholds: [t1, t2] };
+}
+
+/** The full (un-throttled) era rate the chain is in now, under the rule in force. */
+export function eraRateNow(rule: HalvingRule, height: number, totalEmitted: string | number): number | null {
+  if (rule.kind === "height") return eraOf(height).fullRate;
+  if (rule.kind === "unknown") return null;
+  const e = Number(totalEmitted);
+  if (!Number.isFinite(e)) return null;
+  const [t1, t2] = rule.thresholds.map(Number);
+  return e < t1 ? ERAS[0].fullRate : e < t2 ? ERAS[1].fullRate : ERAS[2].fullRate;
+}
+
 export interface Overview {
   chain: { latest_block: { height: number; hash: string; sealed_at: string; signatures: number; signers_total: number }; block_interval_seconds: number };
   operators: { runners: { total: number; active: number; uptime_pct_3d: number }; validators: { total: number; active: number; blocks_archived: number } };
@@ -67,18 +96,18 @@ export interface Param { key: string; value: string; data_type: string; category
 export interface ParamChange { timestamp: string; key: string; before: string | null; after: string | null; actor: string }
 export interface LiveRunner { name: string; endpoint: string | null; protocol_version: number | null; last_seen_at: string | null; stale: boolean; blocks_signed: number | null; last_signed_block: number | null; last_signed_at: string | null }
 
-export const overview = () => get<Overview>("/network/overview", 30);
-export const supplyIdentity = () => get<SupplyIdentity>("/supply", 120);
+export const overview = () => get<Overview>("/network/overview");
+export const supplyIdentity = () => get<SupplyIdentity>("/supply");
 
 export async function blocks(limit: number, offset: number): Promise<LiveBlock[]> {
-  return asArray<LiveBlock>(await get<unknown>(`/blocks?limit=${limit}&offset=${offset}`, 60));
+  return asArray<LiveBlock>(await get<unknown>(`/blocks?limit=${limit}&offset=${offset}`));
 }
 
 export async function block(n: number) {
   const [b, rewards, env] = await Promise.all([
-    getOrNull<{ block: LiveBlock; signatures: unknown }>(`/blocks/${n}`, 300),
-    getOrNull<{ cycles: unknown }>(`/blocks/${n}/rewards`, 300).catch(() => null),
-    getOrNull<{ envelopes: unknown }>(`/blocks/${n}/replay-envelopes`, 300).catch(() => null),
+    getOrNull<{ block: LiveBlock; signatures: unknown }>(`/blocks/${n}`),
+    getOrNull<{ cycles: unknown }>(`/blocks/${n}/rewards`).catch(() => null),
+    getOrNull<{ envelopes: unknown }>(`/blocks/${n}/replay-envelopes`).catch(() => null),
   ]);
   if (!b?.block) return null;
   const envelopes: Envelope[] = asArray<{ id: string; action: string; payload?: { amount?: unknown }; payload_hash: string; submitted_at: string }>(env?.envelopes).map((e) => ({
@@ -98,16 +127,16 @@ export const isLiveTxType = (x: unknown): x is LiveTxType => (LIVE_TX_TYPES as s
 /** Transfers, grants, stakes and unstakes, newest first. `total` is the full count for the filter. */
 export async function transactions(limit: number, offset: number, type?: LiveTxType): Promise<{ items: LiveTx[]; total: number }> {
   const q = `limit=${limit}&offset=${offset}${type ? `&type=${type}` : ""}`;
-  const raw = await getRaw<{ data: unknown; total?: unknown }>(`/transactions?${q}`, 60);
+  const raw = await getRaw<{ data: unknown; total?: unknown }>(`/transactions?${q}`);
   return { items: asArray<LiveTx>(raw.data), total: typeof raw.total === "number" ? raw.total : 0 };
 }
 
 /** One transfer or grant by UUID. Stake and unstake rows have numeric ids and no page of their own. */
-export const txById = (id: string) => getOrNull<LiveTx>(`/transactions/${id}`, 300);
+export const txById = (id: string) => getOrNull<LiveTx>(`/transactions/${id}`);
 
 export interface RankedAddress { public_address: string; balance: string; staked: string; rank: number }
 export async function addresses(limit: number, offset: number): Promise<RankedAddress[]> {
-  return asArray<RankedAddress>(await get<unknown>(`/addresses?limit=${limit}&offset=${offset}`, 60));
+  return asArray<RankedAddress>(await get<unknown>(`/addresses?limit=${limit}&offset=${offset}`));
 }
 
 export interface Credits {
@@ -122,7 +151,7 @@ export interface AddressDetail {
 }
 export async function address(addr: string, limit: number, offset: number, type?: LiveTxType): Promise<AddressDetail | null> {
   const q = `limit=${limit}&offset=${offset}${type ? `&type=${type}` : ""}`;
-  const d = await getOrNull<AddressDetail>(`/addresses/${addr}?${q}`, 60);
+  const d = await getOrNull<AddressDetail>(`/addresses/${addr}?${q}`);
   return d ? { ...d, transactions: asArray<LiveTx>(d.transactions) } : null;
 }
 
@@ -146,7 +175,7 @@ export function addDec(...xs: (string | null | undefined)[]): string {
 export interface Pool { name: string; label: string; public_address: string }
 export interface PreMine { name: string; public_address: string; total_allocation: string; total_released: string; daily_release: string; vesting_start: string | null; vesting_end: string | null }
 export async function protocolWallets(): Promise<{ pools: Pool[]; preMine: PreMine[]; labels: Record<string, string> }> {
-  const d = await get<{ pools: unknown; pre_mine: unknown }>("/protocol-wallets", 300);
+  const d = await get<{ pools: unknown; pre_mine: unknown }>("/protocol-wallets");
   const pools = asArray<Pool>(d.pools).filter((p) => ADDRESS_RE.test(p.public_address));
   const preMine = asArray<PreMine>(d.pre_mine).filter((p) => ADDRESS_RE.test(p.public_address));
   const labels: Record<string, string> = {};
@@ -155,11 +184,11 @@ export async function protocolWallets(): Promise<{ pools: Pool[]; preMine: PreMi
 }
 
 export async function mempoolTo(addr: string) {
-  return asArray<{ sender_address: string | null; amount: string | null; submitted_at: string }>(await getOrNull<unknown>(`/mempool?to=${addr}`, 30));
+  return asArray<{ sender_address: string | null; amount: string | null; submitted_at: string }>(await getOrNull<unknown>(`/mempool?to=${addr}`, true));
 }
 
 export async function parameters(): Promise<Param[]> {
-  return asArray<Param & { description?: string }>(await get<unknown>("/parameters", 300)).map((p) => ({
+  return asArray<Param & { description?: string }>(await get<unknown>("/parameters")).map((p) => ({
     key: String(p.key),
     value: safeValue(String(p.value), true) ?? WITHHELD,
     data_type: String(p.data_type),
@@ -183,7 +212,7 @@ export const safeValue = (v: string | null, keyIsPublic: boolean): string | null
 export async function history(): Promise<ParamChange[]> {
   type Row = { timestamp: string; actor_id?: string; parameter_key: string; before_state?: { value?: unknown } | null; after_state?: { value?: unknown } | null };
   const val = (s: Row["before_state"]) => (s && s.value !== undefined && s.value !== null ? String(s.value) : null);
-  const [rows, params] = await Promise.all([get<unknown>("/parameters/history?limit=200", 300), parameters()]);
+  const [rows, params] = await Promise.all([get<unknown>("/parameters/history?limit=200"), parameters()]);
   const publicKeys = new Set(params.map((p) => p.key));
   return asArray<Row>(rows).map((r) => {
     const key = String(r.parameter_key);
@@ -201,7 +230,7 @@ export async function history(): Promise<ParamChange[]> {
 export async function runners(): Promise<LiveRunner[]> {
   type A = { name: string; public_endpoint: string | null; last_seen_at: string | null; protocol_version: number | null; stale: boolean };
   type V = { signer_id: string; blocks_signed: number; last_signed_block: number; last_signed_at: string };
-  const [a, v] = await Promise.all([get<unknown>("/runners/active", 30), get<unknown>("/validators", 60)]);
+  const [a, v] = await Promise.all([get<unknown>("/runners/active", true), get<unknown>("/validators")]);
   const vs = new Map(asArray<V>(v).map((x) => [x.signer_id, x]));
   return asArray<A>(a)
     .map((r) => {
@@ -215,7 +244,7 @@ export async function runners(): Promise<LiveRunner[]> {
     .sort((x, y) => x.name.localeCompare(y.name));
 }
 
-export const genesis = async () => (await getOrNull<{ block: LiveBlock }>("/blocks/0", 86_400))?.block ?? null;
+export const genesis = async () => (await getOrNull<{ block: LiveBlock }>("/blocks/0"))?.block ?? null;
 
 /** Runner signatures only: the "protocol" row is the chain's own key, not a runner. */
 export const runnerSigners = (sigs: { signer_id: string }[] | null | undefined): string[] =>

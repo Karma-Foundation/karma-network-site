@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { KD, ago, fmt, isoMs, pctDec, short, shortTx } from "@/lib/format";
-import type { LiveTx, ParamChange } from "@/lib/ledger/live/data";
+import { KD, ago, fmt, fmtDec, isoMs, pctDec, short, shortTx } from "@/lib/format";
+import type { HalvingRule, LiveTx, ParamChange } from "@/lib/ledger/live/data";
 
 /** Shown wherever the ledger's public API has no endpoint for what the page is about. */
 export function NotPublished({ title, children }: { title: string; children: React.ReactNode }) {
@@ -130,4 +130,13 @@ export function SimplePager({ href, page, hasOlder, note }: { href: (p: number) 
       </div>
     </div>
   );
+}
+
+/** The halving rule in force, worded from the ledger's own parameters (audit item 7). */
+export function HalvingSentence({ rule }: { rule: HalvingRule }) {
+  if (rule.kind === "emitted") {
+    return <>The era rate halves after {fmtDec(rule.thresholds[0])} к emitted and again after {fmtDec(rule.thresholds[1])} к.</>;
+  }
+  if (rule.kind === "height") return <>The era rate halves after blocks 105,119 and 210,239.</>;
+  return <>The halving thresholds are not published by the ledger right now.</>;
 }

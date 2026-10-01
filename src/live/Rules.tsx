@@ -2,13 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Crumb } from "@/components/ui";
 import { KD, ago, dateStr, fmt, isoMs, pctDec, timeStr } from "@/lib/format";
-import { ERAS, MAX_SUPPLY, address, blocks, eraOf, history, overview, paramMap, parameters, protocolWallets, runners, supplyIdentity, type ParamChange } from "@/lib/ledger/live/data";
-import { ChangeTable, NotPublished, ShareBarsLive, shareRows } from "./parts";
+import { ERAS, MAX_SUPPLY, address, blocks, eraRateNow, halvingRule, history, overview, paramMap, parameters, protocolWallets, runners, supplyIdentity, type ParamChange } from "@/lib/ledger/live/data";
+import { ChangeTable, HalvingSentence, NotPublished, ShareBarsLive, shareRows } from "./parts";
 
 export async function LiveProtocol() {
   const [ov, sup, p, latest] = await Promise.all([overview(), supplyIdentity(), paramMap(), blocks(1, 0)]);
   const H = ov.chain.latest_block.height;
-  const era = eraOf(H);
+  const rule = halvingRule(p);
+  const eraRate = eraRateNow(rule, H, sup.total_emitted);
   const b = latest[0];
   const v = (k: string) => p[k] ?? "-";
   return (
@@ -26,8 +27,8 @@ export async function LiveProtocol() {
           <div className="k">Emitted by blocks</div><div className="mono">{KD(sup.total_emitted)} ({pctDec(sup.total_emitted, MAX_SUPPLY, 3)} of max)</div>
           <div className="k">Burned to date</div><div className="mono">{KD(sup.total_burned)}</div>
           <div className="k">Block time</div><div className="mono">{ov.chain.block_interval_seconds / 60} minutes</div>
-          <div className="k">Emission per block</div><div className="mono">{b ? KD(b.emission_amount) : "-"} now = era rate {era.fullRate} к × release {v("emission_release_pct")}% (in force from block {fmt(Number(v("emission_release_pct_activation_block")) || 0)})</div>
-          <div className="k">Halving</div><div className="mono">{ERAS.map((e, i) => `${e.fullRate} к ${e.upTo ? `to block ${fmt(e.upTo)}` : "after"}${i < ERAS.length - 1 ? " · " : ""}`).join("")}</div>
+          <div className="k">Emission per block</div><div className="mono">{b ? KD(b.emission_amount) : "-"} now = era rate {eraRate ?? "-"} к × release {v("emission_release_pct")}% (in force from block {fmt(Number(v("emission_release_pct_activation_block")) || 0)})</div>
+          <div className="k">Halving</div><div className="mono">{rule.kind === "height" ? ERAS.map((e, i) => `${e.fullRate} к ${e.upTo ? `to block ${fmt(e.upTo)}` : "after"}${i < ERAS.length - 1 ? " · " : ""}`).join("") : <HalvingSentence rule={rule} />}</div>
         </div>
       </div>
 
@@ -194,7 +195,7 @@ export async function LiveStatus() {
         <div className="stat"><div className="l">Block height</div><div className="v">{fmt(lb.height)}</div><div className="s">sealed {ago(isoMs(lb.sealed_at))}</div></div>
         <div className="stat"><div className="l">Next block expected</div><div className="v">{timeStr(next).slice(-9)}</div><div className="s">{ov.chain.block_interval_seconds / 60}-minute target</div></div>
         <div className="stat"><div className="l">Latest block signed by</div><div className="v">{lb.signatures} of {lb.signers_total}</div><div className="s">{stale.length ? `${stale.map((r) => r.name).join(", ")} not seen for 3 minutes` : "all runners seen"}</div></div>
-        <div className="stat"><div className="l">Runner uptime, 3 days</div><div className="v">{ov.operators.runners.uptime_pct_3d}%</div><div className="s">{ov.operators.runners.active} of {ov.operators.runners.total} active</div></div>
+        <div className="stat"><div className="l">Block production, 3 days</div><div className="v">{ov.operators.runners.uptime_pct_3d}%</div><div className="s">10-minute slots with a block</div></div>
       </div>
       <div className="section" style={{ marginTop: 32 }}>
         <h2 style={{ marginBottom: 16 }}>Supply identity</h2>
