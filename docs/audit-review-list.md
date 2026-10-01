@@ -10,3 +10,4 @@
 | 6 | Wallet 3775f434… 100% not itemised | Same as 5 | Andrey | open |
 | 7 | observer_last_verified_block:foundation-3 stuck at 4208 since 28 Jun | Dead parameter or verification not running | Andrey | open |
 | 8 | Foundation auto-stake wallet unlabelled; no bot vs human split of staked total | Needs the address from Andrey, then a site label | Andrey for the address, site for the label | open |
+| 9 | Ordinary wallets show first_seen = 26 Jun wallet-row re-creation, not earliest activity (example 4894fe60… has a transfer in block 1,561 on 10 Jun) | API fix, first_seen should be earliest activity | Andrey | open |
