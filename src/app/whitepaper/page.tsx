@@ -3,6 +3,10 @@ import Link from "next/link";
 import { Crumb } from "@/components/ui";
 import { BridgeFig, LifecycleFig, RecognitionFig, ReplayFig, SplitFig, SupplyFig } from "./figures";
 
+// The prose is static, but the header block badge must come from the live ledger
+// snapshot like every other page (audit item 29), so this renders per request.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Whitepaper",
   description: "Karma: a recognition ledger for the conscious economy. The protocol, its economics, its limits and the questions still open.",
