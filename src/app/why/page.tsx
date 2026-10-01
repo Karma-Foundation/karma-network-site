@@ -80,6 +80,7 @@ export default function Why() {
           The full design, with its economics, its limits and the questions still open, is in the <Link href="/whitepaper">whitepaper</Link>.
         </p>
         <p className="mono f14" style={{ marginTop: 40 }}>The Karma Foundation</p>
+        <p className="muted mono f13" style={{ marginTop: 6 }}>The Karma Foundation is not yet incorporated; formation is under evaluation. Until then this name refers to the protocol team.</p>
       </div>
     </div>
   );

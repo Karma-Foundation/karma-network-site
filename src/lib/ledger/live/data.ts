@@ -244,6 +244,9 @@ export async function runners(): Promise<LiveRunner[]> {
     .sort((x, y) => x.name.localeCompare(y.name));
 }
 
+/** Block 1: the chain start shown on the site. Block 0 was re-sealed on 26 Jun 2026, after block 1 (30 May). */
+export const firstBlock = async () => (await getOrNull<{ block: LiveBlock }>("/blocks/1"))?.block ?? null;
+
 export const genesis = async () => (await getOrNull<{ block: LiveBlock }>("/blocks/0"))?.block ?? null;
 
 /** Runner signatures only: the "protocol" row is the chain's own key, not a runner. */

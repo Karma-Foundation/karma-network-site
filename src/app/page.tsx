@@ -29,7 +29,7 @@ export default async function Home() {
       <div className="hero">
         <h1>A rule-based ledger that issues and distributes Karma.</h1>
         <p className="lede" style={{ margin: "24px 0" }}>
-          Karma (к) is created by a fixed protocol, not by a company. Every rule, every wallet the protocol controls, and every change to the rules is published here. This site sells nothing.
+          Karma (к) is created by a fixed protocol, not by a company. Every rule, every wallet the protocol controls, and every change to the rules is published here.
         </p>
         <div className="btns">
           <Link className="btn primary" href="/protocol">Read the rules</Link>
