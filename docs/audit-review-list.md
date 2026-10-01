@@ -4,7 +4,7 @@
 |---|---|---|---|---|
 | 1 | Unclaimed Kreators earn in their name without consent | Needs a protocol change | Andrey | open |
 | 2 | Auth-gated route under /api/v1/public/ (builders) contradicts "Auth: none" on the documents page, and /builders is missing from the endpoint list | Rename when client ids change | Andrey | open |
-| 3 | Runner and API on karmaterminal.com domains while the site says the network is separate from the product | Move when infrastructure is next touched | Roy | open |
+| 3 | Protocol API is served from chain.karmaterminal.com, a product domain. Move the canonical API to a karmanetwork.org hostname (e.g. api.karmanetwork.org); keep chain.karmaterminal.com as an alias until every client has switched. The Karma Terminal runner stays on its own domain by design. | Needs a planned migration; nothing changes until then. | Andrey | open |
 | 4 | Why block 0 was re-sealed on 26 Jun and why vesting started 5 May | One line each for the site | Andrey | open |
 | 5 | Foundation pool outflows not itemised (~259K), Grants tab empty | API itemisation, #696 follow-up | Andrey | open |
 | 6 | Wallet 3775f434… 100% not itemised | Same as 5 | Andrey | open |

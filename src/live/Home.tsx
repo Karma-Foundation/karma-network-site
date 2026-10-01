@@ -142,13 +142,13 @@ export async function LiveHome() {
         <div className="sec-intro">
           <div className="kicker">05 - Built on the ledger</div>
           <h2>What Karma Network is not</h2>
-          <p className="body">Products that use the ledger are built and operated by others. The network does not run, own, endorse or guarantee any of them. If one fails, the ledger does not.</p>
+          <p className="body">Products that use the ledger are built and operated by teams in the ecosystem, including the protocol team. The network does not run, own, endorse or guarantee any of them. If one fails, the ledger does not.</p>
         </div>
         <div className="panel tw">
           <table>
             <thead><tr><th>Service</th><th>What it does</th><th>Operator</th><th>Relationship</th></tr></thead>
             <tbody>
-              <tr><td className="fw5">Karma Terminal</td><td className="wrap-ok body">Wallet. Sends and stakes к.</td><td>[Operator entity]</td><td className="muted">[Relationship]</td></tr>
+              <tr><td className="fw5">Karma Terminal</td><td className="wrap-ok body">Wallet. Sends and stakes к.</td><td className="wrap-ok">Karma Terminal team - the same team that operates all four runners today; no separate entity yet.</td><td className="wrap-ok muted">Builds on the network, like Blockstream builds on Bitcoin: wallet, one runner, tooling. The network is not dependent on it; today the team also operates every runner, so that independence is a goal, not a fact.</td></tr>
               <tr><td className="fw5">Anyone else</td><td className="wrap-ok body">Third-party wallets are not enabled on the ledger today (parameter third_party_wallets_enabled = {p.third_party_wallets_enabled ?? "-"}).</td><td className="muted">-</td><td className="muted">-</td></tr>
             </tbody>
           </table>
