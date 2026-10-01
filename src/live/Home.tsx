@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { DocCards } from "@/components/ui";
 import { KD, ago, dateStr, fmt, fmtDec, isoMs, pctDec } from "@/lib/format";
-import { MAX_SUPPLY, addresses, eraRateNow, genesis, halvingRule, history, overview, paramMap, protocolWallets, runners, supplyIdentity, blocks } from "@/lib/ledger/live/data";
+import { MAX_SUPPLY, addresses, eraRateNow, firstBlock, genesis, halvingRule, history, overview, paramMap, protocolWallets, runners, supplyIdentity, blocks } from "@/lib/ledger/live/data";
 import { ChangeTable, HalvingSentence, RankedTable, ShareBarsLive, shareRows } from "./parts";
 
 export async function LiveHome() {
-  const [ov, sup, p, rs, hist, gen, latest, top, pw] = await Promise.all([overview(), supplyIdentity(), paramMap(), runners(), history(), genesis(), blocks(1, 0), addresses(10, 0), protocolWallets()]);
+  const [ov, sup, p, rs, hist, gen, latest, top, pw, start] = await Promise.all([overview(), supplyIdentity(), paramMap(), runners(), history(), genesis(), blocks(1, 0), addresses(10, 0), protocolWallets(), firstBlock()]);
   const sum = (xs: string[]) => xs.reduce((a, x) => a + Number(x), 0);
   const inWallets = Number(sup.total_in_wallets);
   const poolHeld = sum(top.filter((a) => pw.labels[a.public_address]).map((a) => a.balance));
@@ -19,7 +19,7 @@ export async function LiveHome() {
     <div className="wrap page">
       <div className="hero">
         <h1>A rule-based ledger that issues and distributes Karma.</h1>
-        <p className="lede" style={{ margin: "24px 0" }}>Karma (к) is created by a fixed protocol, not by a company. Every rule, every change to the rules and every block is published here, read directly from the ledger. This site sells nothing.</p>
+        <p className="lede" style={{ margin: "24px 0" }}>Karma (к) is created by a fixed protocol, not by a company. Every rule, every change to the rules and every block is published here, read directly from the ledger.</p>
         <div className="btns">
           <Link className="btn primary" href="/protocol">Read the rules</Link>
           <Link className="btn" href="/ledger/blocks">Open the ledger</Link>
@@ -33,7 +33,12 @@ export async function LiveHome() {
           <div className="stat"><div className="l">Max supply</div><div className="v">{KD(MAX_SUPPLY)}</div><div className="s">fixed</div></div>
           <div className="stat"><div className="l">Wallets</div><div className="v">{fmt(ov.wallets.total)}</div><div className="s">{fmt(ov.wallets.kreators)} are Kreator wallets</div></div>
           <div className="stat"><div className="l">Protocol runners</div><div className="v">{rs.length}</div><div className="s">{active} seen in the last 3 minutes</div></div>
-          <div className="stat"><div className="l">Genesis</div><div className="v">{gen ? dateStr(isoMs(gen.created_at)) : "-"}</div><div className="s">block 0</div></div>
+          <div className="stat">
+            <div className="l">Genesis</div>
+            <div className="v">{start ? dateStr(isoMs(start.created_at)) : "-"}</div>
+            <div className="s">chain start, block 1</div>
+            {gen && <div className="s">Block 0 was re-sealed on {dateStr(isoMs(gen.created_at))}. [REASON - one line from Andrey]</div>}
+          </div>
         </div>
       </div>
 

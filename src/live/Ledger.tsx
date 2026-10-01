@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { CopyButton } from "@/components/CopyButton";
 import { Crumb, LedgerTabs } from "@/components/ui";
 import { KD, ago, dateStr, fmt, isoMs, pctDec, short, shortTx, timeStr } from "@/lib/format";
-import { type AddressDetail, ADDRESS_RE, TX_ID_RE, addDec, address, addresses, block, blocks, isLiveTxType, mempoolTo, overview, protocolWallets, runnerSigners, supplyIdentity, transactions, txById, type LiveTxType } from "@/lib/ledger/live/data";
+import { type AddressDetail, ADDRESS_RE, TX_ID_RE, addDec, address, addresses, block, blocks, firstBlock, isLiveTxType, mempoolTo, overview, protocolWallets, runnerSigners, supplyIdentity, transactions, txById, type LiveTxType } from "@/lib/ledger/live/data";
 import { Tabs } from "@/components/ui";
 import { LiveAddr, LiveTxTable, RankedTable, SimplePager, txTypeLabel } from "./parts";
 
@@ -147,10 +147,13 @@ export async function LiveAddress({ addr: raw, page, type: rawType }: { addr: st
   const addr = raw.toLowerCase();
   if (!ADDRESS_RE.test(addr)) notFound();
   const type: LiveTxType | undefined = isLiveTxType(rawType) ? rawType : undefined;
-  const [d, pending, pw, sup] = await Promise.all([address(addr, ADDR_TXS, (page - 1) * ADDR_TXS, type), mempoolTo(addr), protocolWallets(), supplyIdentity()]);
+  const [d, pending, pw, sup, start] = await Promise.all([address(addr, ADDR_TXS, (page - 1) * ADDR_TXS, type), mempoolTo(addr), protocolWallets(), supplyIdentity(), firstBlock()]);
   if (!d) notFound();
   const label = pw.labels[addr];
   const pools = pw.pools.filter((p) => p.public_address === addr);
+  // A protocol pool wallet receives its share from block 1. Its first_seen in the API is
+  // the 26 Jun re-creation of the wallet row, so the chain start (block 1) is shown instead.
+  const firstSeen = pools.length > 0 && start ? start.created_at : d?.first_seen ?? null;
   const pre = pw.preMine.filter((p) => p.public_address === addr);
   const unseen = d.tx_count === 0 && d.balance === "0.000" && !d.first_seen;
   const href = (p: number, t = type ?? "all") => {
@@ -177,7 +180,7 @@ export async function LiveAddress({ addr: raw, page, type: rawType }: { addr: st
       <div className="stats n4">
         <div className="stat"><div className="l">Balance</div><div className="v">{KD(d.balance)}</div><div className="s">{pctDec(d.balance, sup.total_in_wallets, 3)} of all Karma in wallets</div></div>
         <div className="stat"><div className="l">Staked</div><div className="v">{KD(d.staked)}</div><div className="s">on Kreators</div></div>
-        <div className="stat"><div className="l">First seen</div><div className="v">{d.first_seen ? dateStr(isoMs(d.first_seen)) : "-"}</div><div className="s">{d.first_seen ? ago(isoMs(d.first_seen)) : "never"}</div></div>
+        <div className="stat"><div className="l">First seen</div><div className="v">{firstSeen ? dateStr(isoMs(firstSeen)) : "-"}</div><div className="s">{pools.length > 0 && start ? "chain start, block 1" : firstSeen ? ago(isoMs(firstSeen)) : "never"}</div></div>
         <div className="stat"><div className="l">Transactions</div><div className="v">{fmt(d.tx_count)}</div><div className="s">transfers, grants, stakes, unstakes</div></div>
       </div>
       {!unseen && <Breakdown d={d} pool={pools.length > 0} />}

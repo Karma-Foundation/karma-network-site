@@ -14,7 +14,7 @@ const mono = IBM_Plex_Mono({ subsets: ["latin", "cyrillic"], weight: ["400", "50
 export const metadata: Metadata = {
   title: { default: "Karma Network", template: "Karma Network - %s" },
   description:
-    "The public record of the Karma protocol: the rules, the ledger, who controls what, and what changed. This site sells nothing.",
+    "The public record of the Karma protocol: the rules, the ledger, who controls what, and what changed.",
 };
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
 

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Crumb } from "@/components/ui";
 import { KD, ago, dateStr, fmt, isoMs, pctDec, timeStr } from "@/lib/format";
-import { ERAS, MAX_SUPPLY, address, blocks, eraRateNow, halvingRule, history, overview, paramMap, parameters, protocolWallets, runners, supplyIdentity, type ParamChange } from "@/lib/ledger/live/data";
+import { ERAS, MAX_SUPPLY, address, blocks, eraRateNow, firstBlock, halvingRule, history, overview, paramMap, parameters, protocolWallets, runners, supplyIdentity, type ParamChange } from "@/lib/ledger/live/data";
 import { ChangeTable, HalvingSentence, NotPublished, ShareBarsLive, shareRows } from "./parts";
 
 export async function LiveProtocol() {
@@ -216,7 +216,9 @@ export async function LiveStatus() {
 }
 
 export async function LiveWallets() {
-  const [p, sup, latest, pw] = await Promise.all([paramMap(), supplyIdentity(), blocks(1, 0), protocolWallets()]);
+  const [p, sup, latest, pw, start] = await Promise.all([paramMap(), supplyIdentity(), blocks(1, 0), protocolWallets(), firstBlock()]);
+  const vestingStart = pw.preMine.map((x) => isoMs(x.vesting_start)).filter((t) => Number.isFinite(t)).sort((a, b) => a - b)[0];
+  const vestedBeforeChain = vestingStart !== undefined && start !== null && vestingStart < isoMs(start.created_at);
   const b = latest[0];
   const details = await Promise.all(pw.pools.map((x) => address(x.public_address, 1, 0)));
   const perBlock: Record<string, string | undefined> = { builders: b?.community_amount, foundation: b?.foundation_amount, tech_builders: b?.builders_amount, validators: b?.validators_amount };
@@ -262,6 +264,9 @@ export async function LiveWallets() {
             ))}</tbody>
           </table>
         </div>
+        {vestedBeforeChain && (
+          <p className="muted f13" style={{ marginTop: 10 }}>Vesting began {dateStr(vestingStart)}, before the chain started. [REASON - one line from Andrey]</p>
+        )}
       </div>
 
       <div className="section">

@@ -536,6 +536,7 @@ reward(k)  = budget x weight(k) / sum of all weights`}</Formula>
             <dt>CAI</dt><dd>Culture Authenticity Index, the automated screen applied before review.</dd>
           </dl>
           <p className="muted mono f13" style={{ marginTop: 48 }}>End of draft {DRAFT}. Signed: The Karma Foundation.</p>
+          <p className="muted mono f13" style={{ marginTop: 6 }}>The Karma Foundation is not yet incorporated; formation is under evaluation. Until then this name refers to the protocol team.</p>
         </div>
       </div>
     </div>
