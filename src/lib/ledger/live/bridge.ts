@@ -11,7 +11,7 @@ export const WKARMA = "0xb8986009B556aA5e8607AdF241371b690EfE9C27";
 export const ETHERSCAN_TOKEN = `https://etherscan.io/token/${WKARMA}`;
 const RPCS = ["https://rpc.mevblocker.io", "https://eth.drpc.org", "https://ethereum-rpc.publicnode.com"];
 const TOTAL_SUPPLY_SELECTOR = "0x18160ddd";
-const WEI_PER_MILLI = 1_000_000_000_000_000n;
+const WEI_PER_MILLI = BigInt(1_000_000_000_000_000);
 
 export interface BridgeState {
   escrow: { public_address: string; live_balance: string };
@@ -24,16 +24,16 @@ export interface BridgeState {
 export const bridgeState = () => get<BridgeState>("/bridge/state", true);
 
 const DEC_RE = /^\d+(\.\d{0,3})?$/;
-/** "116.032" -> 116032n. Null for anything that is not a plain decimal with at most three places. */
+/** "116.032" -> 116032 as a bigint. Null for anything that is not a plain decimal with at most three places. */
 export function toMilli(s: string | null | undefined): bigint | null {
   if (typeof s !== "string" || !DEC_RE.test(s)) return null;
   const [whole, frac = ""] = s.split(".");
-  return BigInt(whole) * 1000n + BigInt(frac.padEnd(3, "0"));
+  return BigInt(whole) * BigInt(1000) + BigInt(frac.padEnd(3, "0"));
 }
-/** 116032n -> "116.032"; negatives keep their sign. */
+/** 116032 as a bigint -> "116.032"; negatives keep their sign. */
 export function fromMilli(m: bigint): string {
-  const neg = m < 0n; const a = neg ? -m : m;
-  return `${neg ? "-" : ""}${a / 1000n}.${String(a % 1000n).padStart(3, "0")}`;
+  const neg = m < BigInt(0); const a = neg ? -m : m;
+  return `${neg ? "-" : ""}${a / BigInt(1000)}.${String(a % BigInt(1000)).padStart(3, "0")}`;
 }
 
 let supplyCache: { at: number; value: Promise<bigint | null> } | null = null;
@@ -55,7 +55,7 @@ export function wkarmaSupplyMilli(): Promise<bigint | null> {
         if (typeof json.result !== "string" || !/^0x[0-9a-fA-F]+$/.test(json.result)) continue;
         const wei = BigInt(json.result);
         // The token is only ever minted in whole thousandths; a remainder would itself be a finding.
-        return wei % WEI_PER_MILLI === 0n ? wei / WEI_PER_MILLI : null;
+        return wei % WEI_PER_MILLI === BigInt(0) ? wei / WEI_PER_MILLI : null;
       } catch { /* next RPC */ }
     }
     return null;
