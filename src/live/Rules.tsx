@@ -4,6 +4,7 @@ import { Crumb } from "@/components/ui";
 import { KD, ago, dateStr, fmt, isoMs, pctDec, timeStr } from "@/lib/format";
 import { ERAS, MAX_SUPPLY, address, blocks, eraRateNow, firstBlock, halvingRule, history, overview, paramMap, parameters, protocolWallets, runners, supplyIdentity, type ParamChange } from "@/lib/ledger/live/data";
 import { ChangeTable, HalvingSentence, NotPublished, ShareBarsLive, shareRows } from "./parts";
+import { ETHERSCAN_TOKEN, bridgeBalance } from "@/lib/ledger/live/bridge";
 
 export async function LiveProtocol() {
   const [ov, sup, p, latest] = await Promise.all([overview(), supplyIdentity(), paramMap(), blocks(1, 0)]);
@@ -182,7 +183,7 @@ export async function LiveRunners() {
 }
 
 export async function LiveStatus() {
-  const [ov, sup, rs] = await Promise.all([overview(), supplyIdentity(), runners()]);
+  const [ov, sup, rs, br] = await Promise.all([overview(), supplyIdentity(), runners(), bridgeBalance()]);
   const lb = ov.chain.latest_block;
   const next = isoMs(lb.sealed_at) + ov.chain.block_interval_seconds * 1000;
   const stale = rs.filter((r) => r.stale);
@@ -205,6 +206,26 @@ export async function LiveStatus() {
           <div className="k">Accounted for</div><div className="mono">{KD(sup.total_in_wallets)} in wallets + {KD(sup.total_burned)} burned + {KD(sup.unreleased_pre_mine)} unreleased = {KD(sup.right_side)}</div>
           <div className="k">Discrepancy</div><div className="mono">{KD(sup.discrepancy)}</div>
         </div>
+      </div>
+      <div className="section">
+        <h2 style={{ marginBottom: 16 }}>Ethereum bridge</h2>
+        <p className="body f14" style={{ maxWidth: 720, margin: "0 0 16px" }}>Karma sent to Ethereum is held in the bridge escrow and the same amount of wKARMA is minted there; the way back burns the wKARMA and releases the Karma. So wKARMA in existence must equal the Karma held, to the thousandth.</p>
+        {br ? (
+          <div className="panel rows">
+            <div className="k">Result</div>
+            <div className={br.balanced === null ? "amber" : br.balanced ? "green" : "red"}>{br.balanced === null ? "wKARMA supply could not be read from Ethereum right now" : br.balanced ? "balanced" : "DOES NOT BALANCE"}</div>
+            <div className="k">Karma held</div>
+            <div className="mono">{KD(br.escrow)} in <Link href={`/address/${br.escrowAddress}`}>escrow</Link> − {KD(br.feeReserve)} fee reserve = {KD(br.locked)} backing wKARMA</div>
+            <div className="k">wKARMA in existence</div>
+            <div className="mono">{br.wkarma === null ? "-" : `${br.wkarma} wKARMA`} · <a href={ETHERSCAN_TOKEN} target="_blank" rel="noreferrer">total supply on Etherscan</a></div>
+            <div className="k">Difference</div>
+            <div className="mono">{br.difference === null ? "-" : KD(br.difference)}</div>
+            <div className="k">Bridge</div>
+            <div className="mono">{br.frozen ? "frozen" : "open"} · releases confirmed by {br.signers.threshold} of {br.signers.total} signers</div>
+          </div>
+        ) : (
+          <NotPublished title="Bridge state"><div>The ledger did not answer the bridge state request. Try again in a moment.</div></NotPublished>
+        )}
       </div>
       <div className="section">
         <NotPublished title="Incidents">
