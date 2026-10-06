@@ -8,6 +8,7 @@ import { BlockPill } from "./BlockPill";
 const LINKS = [
   { href: "/protocol", label: "Protocol", match: ["/protocol"] },
   { href: "/ledger/blocks", label: "Ledger", match: ["/ledger", "/address", "/block", "/tx", "/search"] },
+  { href: "/status", label: "Status", match: ["/status"] },
   { href: "/wallets", label: "Wallets", match: ["/wallets"] },
   { href: "/governance", label: "Governance", match: ["/governance"] },
   { href: "/notices", label: "Notices", match: ["/notices"] },
