@@ -246,7 +246,8 @@ export function DocCards({ specTitle, live }: { specTitle?: string; live?: boole
       ["Protocol rules", "Emission, distribution, staking, fees and signatures, read from the ledger's parameters", "/protocol"],
       ["Whitepaper", "The protocol, its economics, its limits and the questions still open", "/whitepaper"],
       ["Why", "Why the protocol exists, what it rewards, what it refuses to do", "/why"],
-      ["Parameters and change log", "Every rule the ledger enforces and every change to it", "/governance"],
+      ["How the Karma Council works", "Seats, mandate, how a decision is made, money and keys", "/governance"],
+      ["Parameters and change log", "Every rule the ledger enforces and every change to it", "/governance#parameters"],
       ["Runners", "The nodes that produce and sign blocks, and their status", "/runners"],
       ["Ledger API", "The public, read-only API every page on this site is built from", "/documents"],
     ];
@@ -255,6 +256,10 @@ export function DocCards({ specTitle, live }: { specTitle?: string; live?: boole
         {cards.map(([t, desc, href]) => (
           <Link key={t} className="card" href={href}><div className="t">{t}</div><div className="d">{desc}</div></Link>
         ))}
+        <div className="card">
+          <div className="t">Council Constitution</div>
+          <div className="d">To be published after signing</div>
+        </div>
         <div className="card">
           <div className="t" style={{ display: "flex", gap: 8, alignItems: "center" }}>Source code <span className="tag amber">not yet public</span></div>
           <div className="d">The protocol repository is not public yet. [DATE]</div>

@@ -46,7 +46,10 @@ src/lib/ledger/mock.ts     MockLedger - seeded, deterministic, ported from the p
 src/lib/ledger/rpc.ts      RpcLedger stub
 src/lib/ledger/index.ts    getLedger() by LEDGER_MODE, showDummyBanner()
 src/lib/format.ts          fmt, K (к suffix), pct, short, dateStr, timeStr, ago
+src/content/decisions.ts   the Karma Council decision log: one entry per decision (see HOW-TO-ADD-A-DECISION.md)
+src/content/custody.ts     key custody of the council's two wallets: single key or multisig, read by /wallets
 src/components/            Nav, BlockPill, CopyButton, ThemeToggle (client); ui.tsx (server)
+                           CouncilRules.tsx holds the governance text, word for word
 src/app/                   one folder per route; src/app/api/v1/* is the JSON API
 ```
 

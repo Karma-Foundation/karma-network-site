@@ -11,3 +11,7 @@
 | 7 | observer_last_verified_block:foundation-3 stuck at 4208 since 28 Jun | Dead parameter or verification not running | Andrey | open |
 | 8 | Foundation auto-stake wallet unlabelled; no bot vs human split of staked total | Needs the address from Andrey, then a site label | Andrey for the address, site for the label | open |
 | 9 | Ordinary wallets show first_seen = 26 Jun wallet-row re-creation, not earliest activity (example 4894fe60… has a transfer in block 1,561 on 10 Jun) | API fix, first_seen should be earliest activity | Andrey | open |
+| 10 | Council member names: Seat 1-3 and Signer 1-3 are published without names | Not published yet; decision for the council | Roy | open |
+| 11 | Council Constitution: the documents page says "To be published after signing", no link | Publish and link once signed | Roy | open |
+| 12 | Multisig switch on the wallets page: both council wallets are held with a single key; when 2 of 3 goes live, change `type` and `liveSince` in src/content/custody.ts | Multisig is not live | Andrey for the multisig, site for the record | open |
+| 13 | How decisions get posted long term: today each decision is one entry in src/content/decisions.ts, committed by hand | Fine for a small log; revisit when the volume or the number of editors grows | Roy | open |
