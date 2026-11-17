@@ -1,7 +1,7 @@
 # Context a fresh chat will not have
 
 Read this before `karmanetwork-build-plan.md`. The plan says WHAT to build. This file is
-everything the plan assumes you know and you do not: who Roy is, how this machine ships code,
+everything the plan assumes you know and you do not: who the founder is, how this machine ships code,
 what the real chain looks like next to the prototype's dummy one, and the rules that were
 learned the hard way in the wallet work. Written 22 Sep 2026 from the session that built the
 wallet, the GDPR gate and the claim flow.
@@ -13,10 +13,10 @@ Nothing here changes the plan's scope. Where it contradicts a plan step, it says
 
 ## 1. Who and what
 
-- **Roy** (roei.levav@gmail.com) is the founder. He owns every frontend and all product and
+- **The founder** owns every frontend and all product and
   copy decisions. He wants short answers, work shipped without narration, and simulations or
   mockups BEFORE a visual change is built. He reads diffs rarely and outcomes always.
-- **Andrey** (@Crypto_Wombat) owns the protocol: the chain, the API, consensus, the database.
+- **The tech lead** owns the protocol: the chain, the API, consensus, the database.
   Nothing in this project touches his code. If the site ever needs a new API route, that is a
   PR to his repo for him to merge, never a direct change.
 - **Karma** is a rule-based ledger. People stake Karma (symbol **к**, Cyrillic small ka, which
@@ -33,7 +33,7 @@ Nothing here changes the plan's scope. Where it contradicts a plan step, it says
 |---|---|---|---|
 | wallet.karmaterminal.com | The wallet, a Telegram mini app + web | `Karma-Foundation/karma-wallet` (static HTML) | Cloudflare Pages |
 | karmaterminal.com | Marketing site + Karma Auction | `Karma-Foundation/karma-terminal-site` (Next 16) | Railway, project "Karma Terminal Website" |
-| chain.karmaterminal.com | The protocol API | `Karma-Foundation/Karma-Protocol` (Andrey's) | Railway, project "nurturing-adventure" |
+| chain.karmaterminal.com | The protocol API | `Karma-Foundation/Karma-Protocol` (the tech lead's) | Railway, project "nurturing-adventure" |
 | **karmanetwork.org** | **This site** | to be created | Railway, new project |
 
 `karmanetwork.org` already resolves (3.33.130.190 / 15.197.148.33 - a registrar parking or
@@ -45,15 +45,15 @@ it is registered and parked, so nobody is surprised later.
 ## 2. Where you are running, and what is already done
 
 **You are most likely a cloud session** on `Karma-Foundation/karma-network-site`, started from
-Roy's phone so the work does not depend on his Mac. The brief you are reading lives in
+the founder's phone so the work does not depend on the founder's Mac. The brief you are reading lives in
 `brief/` of that repo. Three things follow.
 
 **The repo and the Railway project already exist - do not create them.** Plan steps 8 and 9
-were done on 22 Sep 2026 from Roy's Mac:
+were done on 22 Sep 2026 from the founder's Mac:
 
 - GitHub: `Karma-Foundation/karma-network-site`, public, `delete_branch_on_merge` on.
 - Railway: project **`karma-network`** (id `722c3a4f-4f32-4a99-a7fb-791293386234`), workspace
-  "roeilevav's Projects", environment `production`, service **`web`** with the plan's two
+  the founder's workspace, environment `production`, service **`web`** with the plan's two
   variables already set. Reserved URL: https://web-production-72973b.up.railway.app
 
 **You have no Railway credentials, and you do not need any.** Deployment is meant to be
@@ -62,7 +62,7 @@ GitHub-driven: a Railway service sourced from this repo builds and deploys every
 `SHOW_DUMMY_BANNER=true`). Your job ends at a merged PR; Railway does the rest.
 That service is connected as of 22 Sep 2026 - see `brief/DEPLOY-STATUS.md`, which also explains
 why the deployments before your first app merge show FAILED (there was nothing to build) and
-what to do if one fails afterwards. Do not ask Roy for a Railway token and do not try to
+what to do if one fails afterwards. Do not ask the founder for a Railway token and do not try to
 install the CLI.
 
 **Build the app at the REPO ROOT**, not in a subfolder. The plan's step 2 creates a
@@ -78,7 +78,7 @@ first change: branch, PR, squash-merge. No direct pushes to `main`.
 Railway without trouble. If `create-next-app@latest` gives you 16, keep it and say so in the
 README rather than pinning backwards.
 
-### If you are instead running on Roy's Mac
+### If you are instead running on the founder's Mac
 
 Then four things differ, all of them traps:
 
@@ -104,11 +104,11 @@ Then four things differ, all of them traps:
 
 ---
 
-## 3. Workflow rules (Roy's global CLAUDE.md - these apply to every repo)
+## 3. Workflow rules (the founder's global CLAUDE.md - these apply to every repo)
 
 1. Sync before starting: `git fetch origin`, be level with `origin/main`.
 2. **Everything goes through a PR. Never push to `main`**, even one line. Branch
-   (`feat/…`, `fix/…`), commit, push, PR, squash-merge. For this site Roy's lane rule is
+   (`feat/…`, `fix/…`), commit, push, PR, squash-merge. For this site the founder's lane rule is
    self-merge after checks - there is no second reviewer. The one exception is the very first
    push that creates `main`.
 3. **Stage by explicit path. Never `git add -A` or `git add .`** Verify with
@@ -128,7 +128,7 @@ Then four things differ, all of them traps:
 ## 4. Copy rules
 
 - **No em dashes in anything a user can read. Ever.** Use " - " (spaced hyphen). The plan
-  says this once; it is Roy's hardest copy rule and it has been broken by accident more than
+  says this once; it is the founder's hardest copy rule and it has been broken by accident more than
   once, including in mockups. Grep the build for `—` before every PR. En dashes too.
 - The public name of the operator is **"the Karma community"**. Not "Karma Foundation", not
   "the Foundation" as a legal person. "Foundation wallet" as the NAME OF A WALLET is fine and
@@ -228,7 +228,7 @@ Notes that save an afternoon:
   `/notices` once live. `/network/overview` is one call that feeds most of the home stats.
 - There is **no** address endpoint, no address-ranking endpoint, no tx-by-id endpoint, and no
   search endpoint. `/ledger/addresses`, `/address/[addr]`, `/tx/[id]` and `/search` cannot be
-  backed by the live API as it stands; they need routes from Andrey. Say this in the README so
+  backed by the live API as it stands; they need routes from the tech lead. Say this in the README so
   nobody assumes `rpc` mode is a config flip.
 - `/builders` is 401 (section 5). `/status` does not exist (404) despite the name.
 - **Every call has a floor of about 0.5 s** regardless of payload (6 KB took 533 ms, measured
@@ -249,7 +249,7 @@ Notes that save an afternoon:
   Screenshots time out while hidden. This produced two false "it's broken" alarms. The plan's
   "block pill updates every 30 s" and any scroll behaviour must be tested with the tab
   fronted, or by calling the function directly - and say which you did.
-- **Verify by measuring, not by reading.** Roy was told a flash was fixed when only its button
+- **Verify by measuring, not by reading.** The founder was told a flash was fixed when only its button
   had been hidden; the subtitle still flashed. Sample what is on screen during the slow path,
   not just the end state. For alignment, measure; for "is it live", curl the deployed file
   and grep for the new symbol.
@@ -262,7 +262,7 @@ Notes that save an afternoon:
 - **A deep link is a one-time instruction.** If `/search?q=` or any query param drives
   navigation, make sure a reload does not re-fire it over the user's place.
 - **Deploy check.** Railway builds take a couple of minutes. After merge, poll the live URL
-  for a string unique to the change before telling Roy it is live. Do not infer "deployed"
+  for a string unique to the change before telling the founder it is live. Do not infer "deployed"
   from a 401/200 on a route that would answer the same way before the change - that mistake
   was made once and caught only by checking the deployed commit hash (`railway status --json`).
 - **Railway SSH** (only if ever needed): arguments are joined and run through `sh -c`
@@ -271,11 +271,11 @@ Notes that save an afternoon:
 
 ---
 
-## 8. Things the plan leaves open that Roy will be asked about - decide or flag, do not guess
+## 8. Things the plan leaves open that the founder will be asked about - decide or flag, do not guess
 
 1. **Owner of the GitHub repo**: `Karma-Foundation` (assumed above). Confirm if org creation
    is refused.
-2. **`/why`** is Roy's to write. Ship the placeholder exactly as the plan specifies and list
+2. **`/why`** is the founder's to write. Ship the placeholder exactly as the plan specifies and list
    it in the final message.
 3. **`/notices` seed entries** are to be "derived from the change log, the incident and the
    pending transfer" in the prototype. Derive them; do not invent new events, and do not
@@ -290,8 +290,8 @@ Notes that save an afternoon:
 
 ---
 
-## 9. Final message Roy expects (the plan's, plus two lines)
+## 9. Final message the founder expects (the plan's, plus two lines)
 
 Repo URL, Railway URL, the list of bracketed placeholders still on the site - and, from this
 file: the list of prototype rules that differ from the live chain (section 6), and which of
-the routes cannot be backed by the live API without new endpoints from Andrey.
+the routes cannot be backed by the live API without new endpoints from the tech lead.
