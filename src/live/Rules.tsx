@@ -287,11 +287,11 @@ export async function LiveWallets() {
           </table>
         </div>
         {vestedBeforeChain && (
-          <p className="muted f13" style={{ marginTop: 10 }}>Vesting began {dateStr(vestingStart)}, before the chain started. [REASON - one line from Andrey]</p>
+          <p className="muted f13" style={{ marginTop: 10 }}>Vesting began {dateStr(vestingStart)}, before the chain started. Reason: Not yet set.</p>
         )}
       </div>
 
-      <div className="section">
+      <div className="section" id="key-custody" style={{ scrollMarginTop: 96 }}>
         <h2 style={{ marginBottom: 12 }}>Key custody</h2>
         <p className="body f14" style={{ maxWidth: 720, margin: "0 0 16px" }}>Who can sign for the council&apos;s two wallets. The ledger does not record signers or thresholds, so this is stated by the council and is not read from the ledger. Spending rules are on the <Link href="/governance">governance page</Link>.</p>
         <div className="panel tw wp-table" style={{ margin: 0 }}>

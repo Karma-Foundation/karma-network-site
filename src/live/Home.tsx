@@ -37,7 +37,7 @@ export async function LiveHome() {
             <div className="l">Genesis</div>
             <div className="v">{start ? dateStr(isoMs(start.created_at)) : "-"}</div>
             <div className="s">chain start, block 1</div>
-            {gen && <div className="s">Block 0 was re-sealed on {dateStr(isoMs(gen.created_at))}. [REASON - one line from Andrey]</div>}
+            {gen && <div className="s">Block 0 was re-sealed on {dateStr(isoMs(gen.created_at))}. Reason: Not yet set.</div>}
           </div>
         </div>
       </div>
@@ -118,7 +118,7 @@ export async function LiveHome() {
           {pw.pools.filter((x) => x.name === "foundation" || x.name === "tech_builders").map((x) => (
             <div className="card" key={x.name}>
               <div className="t">{x.label} pool</div>
-              <div className="body f14">Receives {x.name === "foundation" ? p.emission_foundation_pct : p.emission_tech_builders_pct}% of every block. Balance, history and pre-mine vesting are on its address page. Who can sign for it: [DATE].</div>
+              <div className="body f14">Receives {x.name === "foundation" ? p.emission_foundation_pct : p.emission_tech_builders_pct}% of every block. Balance, history and pre-mine vesting are on its address page. Who can sign for it: <Link href="/wallets#key-custody">see Key custody</Link>.</div>
               <Link href={`/address/${x.public_address}`} className="mono">{x.public_address.slice(0, 8)}…{x.public_address.slice(-4)} →</Link>
             </div>
           ))}

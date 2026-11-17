@@ -1,4 +1,6 @@
 /* The council's decision log and custody records (src/content). */
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { CUSTODY, custodyLine, custodyType, type Custody } from "../../../content/custody";
 import {
@@ -82,5 +84,24 @@ describe("custody", () => {
   it("names signers by number only", () => {
     expect(JSON.stringify(CUSTODY)).not.toMatch(/\b(Roy|Roei|Andrey)\b/);
     for (const c of Object.values(CUSTODY)) expect(c.signers).toEqual(["Signer 1", "Signer 2", "Signer 3"]);
+  });
+});
+
+describe("page sources", () => {
+  const root = join(__dirname, "../../..");
+  const files = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const p = join(dir, e.name);
+    if (e.isDirectory()) return e.name === "__tests__" ? [] : files(p);
+    return /\.(tsx?|css)$/.test(e.name) ? [p] : [];
+  });
+  it("carry no person's name, placeholders included", () => {
+    const hits = files(root).filter((f) => /\b(Roy|Roei|Andrey)\b/.test(readFileSync(f, "utf8")));
+    expect(hits).toEqual([]);
+  });
+  it("name the council's two wallets the way the ledger does", () => {
+    const text = readFileSync(join(root, "components/CouncilRules.tsx"), "utf8");
+    expect(text).toContain("the Foundation pool and the Tech Builders pool");
+    expect(text).not.toMatch(/(?<!Tech )Builders pool/);
+    expect(Object.keys(CUSTODY).sort()).toEqual(["foundation", "tech_builders"]);
   });
 });

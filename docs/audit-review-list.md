@@ -15,3 +15,5 @@
 | 11 | Council Constitution: the documents page says "To be published after signing", no link | Publish and link once signed | Roy | open |
 | 12 | Multisig switch on the wallets page: both council wallets are held with a single key; when 2 of 3 goes live, change `type` and `liveSince` in src/content/custody.ts | Multisig is not live | Andrey for the multisig, site for the record | open |
 | 13 | How decisions get posted long term: today each decision is one entry in src/content/decisions.ts, committed by hand | Fine for a small log; revisit when the volume or the number of editors grows | Roy | open |
+| 14 | Whitepaper section 10 - bring in line with the council text | A dated note at the top of the section points to the governance page; the section text itself is unchanged | Roy | open |
+| 15 | Home, Legal status wording - review | Left as it is for now | Roy | open |

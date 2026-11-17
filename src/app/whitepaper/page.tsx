@@ -356,6 +356,9 @@ reward(k)  = budget x weight(k) / sum of all weights`}</Formula>
           <p>Inbound caps, a minimum outbound amount and a refund grace period were added by the audit remediation at protocol version 52 and default to disabled so that replay of historical blocks is unaffected; they are set before the bridge is switched on.</p>
 
           <H2 id="s10" n="10">Governance</H2>
+          <div className="note" style={{ borderColor: "var(--line)", color: "var(--muted)" }}>
+            Note, 17 November 2026: governance is now described in <Link href="/governance">How the Karma Council works</Link>. Where this section differs, that page applies.
+          </div>
           <p>Karma has no token-holder voting. In the current phase the Foundation governs, and this paper says so without decoration. This is a deliberate choice: the network favours a small, accountable Foundation that can decide and act over maximal decentralization. The concern that follows, that a few people control most of the early supply, is addressed by the treasury policy below. What the protocol does is constrain how the Foundation governs:</p>
           <ul>
             <li><strong>Parameters, not code.</strong> Every economic and consensus tunable is a named parameter with a published minimum and maximum. The pool percentages, the staking split, the fee, the vote thresholds and roughly 130 others are readable by anyone from the public API together with their change history.</li>

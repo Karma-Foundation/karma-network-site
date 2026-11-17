@@ -6,7 +6,7 @@ import Link from "next/link";
  * includes Seat 1; change the text and LAST_UPDATED together.
  * No names, no company, no legal entity beyond what the text itself says.
  */
-export const LAST_UPDATED = "16 November 2026";
+export const LAST_UPDATED = "17 November 2026";
 
 function Table({ head, rows }: { head: string[]; rows: string[][] }) {
   return (
@@ -40,7 +40,6 @@ export function CouncilRules({ showParametersLink }: { showParametersLink?: bool
 
         <h2>Starting small</h2>
         <p>The council starts with three seats on purpose: small and manageable, so it stays efficient and effective for where the project is today. As the ecosystem grows, the council will grow with it, and so will the structures and processes around it, including the foundation. The council expects to adjust these rules along the way, and will act as needed for the benefit of the network.</p>
-        <p>The first step is already fixed: the foundation entity is formed within 90 days of the market launch.</p>
 
         <h2>Mandate</h2>
         <Table
@@ -94,7 +93,7 @@ export function CouncilRules({ showParametersLink }: { showParametersLink?: bool
         />
 
         <h2>Money and keys</h2>
-        <p>The council&apos;s funds sit in two wallets: the Foundation pool and the Builders pool, both in к. Each needs 2 of 3 signatures. The signers are the three council members.</p>
+        <p>The council&apos;s funds sit in two wallets: the Foundation pool and the Tech Builders pool, both in к. Each needs 2 of 3 signatures. The signers are the three council members.</p>
         <Table
           head={["Spend", "Who approves"]}
           rows={[

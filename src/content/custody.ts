@@ -31,8 +31,8 @@ export const CUSTODY: Record<string, Custody> = {
     signers: ["Signer 1", "Signer 2", "Signer 3"],
     liveSince: null,
   },
-  // The council's "Builders pool". On the ledger this wallet is named tech_builders
-  // (label "Tech Builders"); the pool named "builders" is the Kreator pass-through.
+  // The council's second wallet, "Tech Builders pool" on the site and in the council text.
+  // The ledger pool named "builders" is the Kreator pass-through: not a council wallet, no row here.
   tech_builders: {
     type: "single-key",
     threshold: { required: 2, of: 3 },
