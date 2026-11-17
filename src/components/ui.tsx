@@ -262,7 +262,7 @@ export function DocCards({ specTitle, live }: { specTitle?: string; live?: boole
         </div>
         <div className="card">
           <div className="t" style={{ display: "flex", gap: 8, alignItems: "center" }}>Source code <span className="tag amber">not yet public</span></div>
-          <div className="d">The protocol repository is not public yet. [DATE]</div>
+          <div className="d">The protocol repository is not public yet. Publication date: Not yet set.</div>
         </div>
         <div className="card">
           <div className="t" style={{ display: "flex", gap: 8, alignItems: "center" }}>Security audit <span className="tag amber">not yet</span></div>

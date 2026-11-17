@@ -16,7 +16,6 @@ export default async function DecisionPage({ params }: { params: Promise<{ numbe
   const id = decisionId(d.number);
   // One stable address per decision: /decisions/D-001.
   if (number !== id) permanentRedirect(`/decisions/${id}`);
-  const cost = d.cost ? [d.cost.usdc && `${fmtDec(d.cost.usdc)} USDC`, d.cost.karma && `${fmtDec(d.cost.karma)} к`].filter(Boolean).join(" · ") : "";
   return (
     <div className="wrap page">
       <Crumb items={[{ href: "/governance", label: "Governance" }, { href: "/decisions", label: "Decision log" }, { label: id }]} />
@@ -30,10 +29,16 @@ export default async function DecisionPage({ params }: { params: Promise<{ numbe
         <div className="k">Kind</div><div>{d.kind}</div>
         <div className="k">Vote</div><div className="mono">{voteCount(d)}</div>
         <div className="k">Result</div><div className={d.result === "Passed" ? "green" : "amber"}>{d.result}</div>
-        <div className="k">What was decided</div><div style={{ whiteSpace: "normal" }}>{d.detail}</div>
-        <div className="k">Cost</div><div className="mono">{cost || "None"}</div>
-        <div className="k">Carried out by</div><div>{d.carriedOutBy ? `Seat ${d.carriedOutBy}` : <span className="muted">-</span>}</div>
-        <div className="k">Carried out</div><div>{carriedOut(d)}</div>
+        {d.detailWithheld ? (
+          <><div className="k">Detail</div><div className="muted" style={{ whiteSpace: "normal" }}>The detail of this decision is withheld.</div></>
+        ) : (
+          <>
+            <div className="k">What was decided</div><div style={{ whiteSpace: "normal" }}>{d.detail}</div>
+            <div className="k">Cost</div><div className="mono">{d.cost ? `${fmtDec(d.cost)} к` : "None"}</div>
+            <div className="k">Carried out by</div><div>{d.carriedOutBy ? `Seat ${d.carriedOutBy}` : <span className="muted">-</span>}</div>
+            <div className="k">Carried out</div><div>{carriedOut(d)}</div>
+          </>
+        )}
       </div>
 
       <div className="section" style={{ marginTop: 32 }}>
@@ -50,18 +55,20 @@ export default async function DecisionPage({ params }: { params: Promise<{ numbe
         </div>
       </div>
 
-      <div className="section">
-        <h2 style={{ marginBottom: 12 }}>Linked transactions</h2>
-        <div className="panel">
-          {d.transactions.length ? (
-            <div className="panel-b list">
-              {d.transactions.map((t) => <Link key={t} className="mono break" href={`/tx/${t}`}>{t}</Link>)}
-            </div>
-          ) : (
-            <div className="empty">{carriedOut(d)}</div>
-          )}
+      {!d.detailWithheld && (
+        <div className="section">
+          <h2 style={{ marginBottom: 12 }}>Linked transactions</h2>
+          <div className="panel">
+            {d.transactions.length ? (
+              <div className="panel-b list">
+                {d.transactions.map((t) => <Link key={t} className="mono break" href={`/tx/${t}`}>{t}</Link>)}
+              </div>
+            ) : (
+              <div className="empty">{carriedOut(d)}</div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

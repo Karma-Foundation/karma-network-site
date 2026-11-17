@@ -113,8 +113,8 @@ export default async function Home() {
           <table>
             <thead><tr><th>Service</th><th>What it does</th><th>Operator</th><th>Relationship</th></tr></thead>
             <tbody>
-              <tr><td className="fw5">Karma Terminal</td><td className="wrap-ok body">Wallet. Holds keys, sends and stakes к.</td><td>[Operator entity]</td><td className="muted">Independent</td></tr>
-              <tr><td className="fw5">Karma Exchange</td><td className="wrap-ok body">Trades к against USDC via a bridge to Ethereum.</td><td>[Operator entity]</td><td className="muted">Independent</td></tr>
+              <tr><td className="fw5">Karma Terminal</td><td className="wrap-ok body">Wallet. Holds keys, sends and stakes к.</td><td>Not yet set</td><td className="muted">Independent</td></tr>
+              <tr><td className="fw5">Karma Exchange</td><td className="wrap-ok body">Trades к against USDC via a bridge to Ethereum.</td><td>Not yet set</td><td className="muted">Independent</td></tr>
               <tr><td className="fw5">Anyone else</td><td className="wrap-ok body">The ledger is open. Any wallet or service can read and write to it under the same rules.</td><td className="muted">-</td><td className="muted">No permission needed</td></tr>
             </tbody>
           </table>

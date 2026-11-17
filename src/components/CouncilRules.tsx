@@ -45,11 +45,10 @@ export function CouncilRules({ showParametersLink }: { showParametersLink?: bool
         <Table
           head={["The council decides", "The council does not decide"]}
           rows={[
-            ["Grants from the Karma pools", "Day-to-day spending inside the budget and under the limits"],
-            ["Any single spend above 5,000 USDC or 10,000 к", "Kreator rewards at the published rates - paid without a vote"],
-            ["Contracts above 25,000 USD or longer than 12 months", "Protocol code - reviewed and approved by the tech lead"],
-            ["Any payment or grant to one of its own members", "Who may use the network - nobody needs permission"],
-            ["Who holds a signing key", ""],
+            ["Grants from the Karma pools", "Day-to-day spending inside the budget and under the limit"],
+            ["Any single spend above 10,000 к", "Kreator rewards at the published rates - paid without a vote"],
+            ["Any payment or grant to one of its own members", "Protocol code - reviewed and approved by the tech lead"],
+            ["Who holds a signing key", "Who may use the network - nobody needs permission"],
             ["Protected matters: protocol rules, supply, emission, the sale rule, the market launch date, the brand and domains", ""],
           ]}
         />
@@ -67,7 +66,7 @@ export function CouncilRules({ showParametersLink }: { showParametersLink?: bool
         <ul>
           <li>Seat 1 runs three years so the project cannot be taken over in its first years. It cannot be removed in that time, except for fraud or a criminal conviction.</li>
           <li>Removal for cause needs both other members. Cause means: broke the sale rule, hid a conflict, or acted against a published decision.</li>
-          <li>What a member receives: 200,000 к per seat, earned over four years. The first six months are a trial at 2,000 к a month, counted inside the 200,000. No cash.</li>
+          <li>What a member receives: 200,000 к per seat, earned over four years. The first six months are a trial at 2,000 к a month, counted inside the 200,000.</li>
           <li>Selling: from six months after a market opens, 10% of a member&apos;s credited balance is released each month.</li>
           <li>What a member commits to is set out in the Council Constitution, which every member signs.</li>
         </ul>
@@ -97,7 +96,7 @@ export function CouncilRules({ showParametersLink }: { showParametersLink?: bool
         <Table
           head={["Spend", "Who approves"]}
           rows={[
-            ["Up to 5,000 USDC or 10,000 к per item, inside the budget", "A signer, no vote"],
+            ["Up to 10,000 к per item, inside the budget", "A signer, no vote"],
             ["Above that", "A council vote first, then two signers"],
             ["Kreator rewards at the published rates", "Paid without a vote"],
             ["Anything paid to a council member", "A council vote, then the two other signers"],
@@ -107,7 +106,7 @@ export function CouncilRules({ showParametersLink }: { showParametersLink?: bool
         <h2>What is published</h2>
         <ul>
           <li>This document and the Council Constitution</li>
-          <li>Every decision, with its number, date and vote count</li>
+          <li>Every decision, with its number, date and vote count. Some are published by title only, with the detail withheld</li>
           <li>Every transaction from the council&apos;s wallets</li>
           <li>The signers and the threshold of each wallet</li>
           <li>Every grant, with its lock terms</li>

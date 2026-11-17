@@ -167,7 +167,7 @@ export async function LiveRunners() {
           <div className="panel-b list body f14">
             <div>All runners are operated by the protocol team today. None is independent.</div>
             <div>Runner rewards are switched {p.runner_rewards_enabled === "true" ? "on" : "off"} on the ledger (parameter runner_rewards_enabled).</div>
-            <div>Independent operators and how to become one: [DATE]. Setup guide [LINK]</div>
+            <div>Independent operators and how to become one: Not yet set. Setup guide: Not yet set.</div>
           </div>
         </div>
         <div className="panel">

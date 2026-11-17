@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { fmt } from "@/lib/format";
 import { getLedger } from "@/lib/ledger";
 import { isLive } from "@/lib/ledger";
@@ -42,7 +41,7 @@ export default async function Runners() {
             <div>Requirements: 2 vCPU, 4 GB RAM, 40 GB disk, a public IP.</div>
             <div>Install from the release tag, sync from genesis (about 20 minutes), announce your key.</div>
             <div>New runners are admitted by the existing runners at a simple majority. Removal follows the same rule.</div>
-            <Link href="/documents">Setup guide [LINK]</Link>
+            <div>Setup guide: Not yet set.</div>
           </div>
         </div>
         <div className="panel">

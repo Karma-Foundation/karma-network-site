@@ -36,7 +36,7 @@ export default async function UpgradePage({ params }: { params: Promise<{ versio
         <h2 style={{ marginBottom: 12 }}>What changes</h2>
         <div className="panel panel-b list body"><Numbered items={u.text} /></div>
       </div>
-      <p className="muted f13">Full text, diff against the previous version and the signed proposal document: [LINK]</p>
+      <p className="muted f13">Full text, diff against the previous version and the signed proposal document: Not yet set.</p>
     </div>
   );
 }

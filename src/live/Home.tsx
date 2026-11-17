@@ -106,7 +106,7 @@ export async function LiveHome() {
         <div className="grid2">
           <div className="card">
             <div className="t">Protocol runners</div>
-            <div className="body f14">{rs.length} runners; the latest block carries {lb.signatures} of {lb.signers_total} signatures. A block needs {p.quorum_threshold_signatures ?? "-"} signatures to finalize. All runners are operated by the protocol team today. Independent operators: [DATE].</div>
+            <div className="body f14">{rs.length} runners; the latest block carries {lb.signatures} of {lb.signers_total} signatures. A block needs {p.quorum_threshold_signatures ?? "-"} signatures to finalize. All runners are operated by the protocol team today. Independent operators: Not yet set.</div>
             <Link href="/runners">Runner list →</Link>
           </div>
           <div className="card">

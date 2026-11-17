@@ -27,9 +27,9 @@ export default function Documents() {
       <div className="section">
         <h2 style={{ marginBottom: 16 }}>Contact</h2>
         <div className="panel rows">
-          <div className="k">Protocol questions</div><div className="mono">[EMAIL]</div>
-          <div className="k">Security disclosure</div><div className="mono">[EMAIL] · PGP key [LINK]</div>
-          <div className="k">Press</div><div className="mono">[EMAIL]</div>
+          <div className="k">Protocol questions</div><div className="mono">Not yet set</div>
+          <div className="k">Security disclosure</div><div className="mono">Not yet set · PGP key: Not yet set</div>
+          <div className="k">Press</div><div className="mono">Not yet set</div>
         </div>
       </div>
     </div>
@@ -55,9 +55,9 @@ function LiveDocuments() {
       <div className="section">
         <h2 style={{ marginBottom: 16 }}>Contact</h2>
         <div className="panel rows">
-          <div className="k">Protocol questions</div><div className="mono">[EMAIL]</div>
-          <div className="k">Security disclosure</div><div className="mono">[EMAIL] · PGP key [LINK]</div>
-          <div className="k">Press</div><div className="mono">[EMAIL]</div>
+          <div className="k">Protocol questions</div><div className="mono">Not yet set</div>
+          <div className="k">Security disclosure</div><div className="mono">Not yet set · PGP key: Not yet set</div>
+          <div className="k">Press</div><div className="mono">Not yet set</div>
         </div>
       </div>
     </div>

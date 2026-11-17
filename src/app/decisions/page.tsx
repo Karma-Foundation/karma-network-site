@@ -6,9 +6,12 @@ import { shortTx } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Decision log" };
 
-/** Carried out: a link to each transaction on this site, or "Not yet", or "No transaction". */
+/**
+ * Carried out: a link to each transaction on this site, or "Not yet", or "No transaction".
+ * A withheld decision shows the status only, never a transaction.
+ */
 export function CarriedOutCell({ d }: { d: Decision }) {
-  if (!d.transactions.length) return <span className="muted">{carriedOut(d)}</span>;
+  if (d.detailWithheld || !d.transactions.length) return <span className="muted">{carriedOut(d)}</span>;
   return (
     <>
       {d.transactions.map((t, i) => (
