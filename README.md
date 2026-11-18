@@ -5,8 +5,8 @@ what, and what changed. Read-only. Sells nothing. No analytics, no cookies, no e
 
 **Production reads the live ledger** (`LEDGER_MODE=rpc`) through the protocol's public read-only
 API. `LEDGER_MODE=mock` is the original seeded simulation, kept for design work and tests; a
-banner on every page says which one you are looking at. Bracketed text (`[EMAIL]`, `[DATE]`,
-`[Operator entity]` ...) marks decisions that are still open; the brackets are intentional.
+banner on every page says which one you are looking at. Anything still undecided reads
+"Not yet set" after its label; the site shows no bracketed placeholders, and a test keeps it so.
 
 - Live: https://web-production-72973b.up.railway.app (Railway project `karma-network`, service `web`)
 - Deploys: every merge to `main` builds and deploys by itself (Nixpacks, `npm run build` / `npm start`)
@@ -46,7 +46,10 @@ src/lib/ledger/mock.ts     MockLedger - seeded, deterministic, ported from the p
 src/lib/ledger/rpc.ts      RpcLedger stub
 src/lib/ledger/index.ts    getLedger() by LEDGER_MODE, showDummyBanner()
 src/lib/format.ts          fmt, K (к suffix), pct, short, dateStr, timeStr, ago
+src/content/decisions.ts   the Karma Council decision log: one entry per decision (see HOW-TO-ADD-A-DECISION.md)
+src/content/custody.ts     key custody of the council's two wallets: single key or multisig, read by /wallets
 src/components/            Nav, BlockPill, CopyButton, ThemeToggle (client); ui.tsx (server)
+                           CouncilRules.tsx holds the governance text, word for word
 src/app/                   one folder per route; src/app/api/v1/* is the JSON API
 ```
 
@@ -160,7 +163,7 @@ show only what the chain already serves to anyone.
 Karma-Protocol #683 (2026-09-22) added `/public/addresses`, `/public/addresses/:addr`,
 `/public/transactions/:id`, the extended `/public/transactions` and `/public/protocol-wallets`,
 which closed every data gap this site had. What remains is not an API gap but things the ledger
-does not record at all, so they stay bracketed:
+does not record at all, so the site cannot read them from it:
 
 1. Who can sign for the pool wallets, thresholds, spending policy (the wallets are not multisig on the ledger).
 2. Who holds the `system:foundation` key that applies config updates, and any election or recall process.
@@ -196,8 +199,8 @@ Live public API: `https://chain.karmaterminal.com/api/v1/public`, responses `{ "
 | `tx()` | `/tx/[id]` | **none** - no tx-by-id endpoint |
 | `search()` | `/search` | **none** - no search endpoint |
 
-The four "none" rows need new routes in the protocol repo. That repo is Andrey's: it is a PR
-for him to merge, never a direct change. `/public/builders` answers 401 by design (Kreator data
+The four "none" rows need new routes in the protocol repo. That repo belongs to the tech lead:
+it is a PR for the tech lead to merge, never a direct change. `/public/builders` answers 401 by design (Kreator data
 sits behind the wallet login), so there is no public list of Kreators to build a page from.
 `/public/status` does not exist.
 
@@ -254,7 +257,7 @@ live once a domain is connected. It is NOT the protocol API at
 - No em dashes or en dashes in anything a user can read. Use " - ". Check before every PR:
   `grep -rn "—\|–" src/` must print nothing.
 - The operator is "the Karma community". "Foundation wallet" is the name of a wallet, not an entity.
-- Do not assert a jurisdiction. Leave bracketed placeholders as brackets until decided.
+- Do not assert a jurisdiction. Write "Not yet set" after the label for anything undecided; no bracketed placeholders.
 - "Kreator" is spelled with a K. The symbol is к (Cyrillic small ka).
 
 ## Workflow

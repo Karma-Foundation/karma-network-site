@@ -1,6 +1,6 @@
 # karmanetwork.org - v1 build plan for Claude Code
 
-> **Read `CONTEXT-for-a-fresh-chat.md` first.** It holds what this plan assumes you know: how this machine ships code (three steps below would otherwise fail), Roy's workflow and copy rules, the privacy constraints on what a ledger page may show, and where the prototype's rules differ from the live chain.
+> **Read `CONTEXT-for-a-fresh-chat.md` first.** It holds what this plan assumes you know: how this machine ships code (three steps below would otherwise fail), the founder's workflow and copy rules, the privacy constraints on what a ledger page may show, and where the prototype's rules differ from the live chain.
 
 ## Goal
 Build and deploy the Karma Network site: the public record of the Karma protocol (rules, ledger, who controls what, what changed). Read-only. Sells nothing. Dummy data for now, real ledger later.
@@ -26,7 +26,7 @@ Deliverable: a live Railway URL I can open, plus a GitHub repo.
 |---|---|---|
 | `/` | Home: hero, 6 stats, sections 01-06 | `P.home` |
 | `/protocol` | Full rules page | `P.protocol` |
-| `/why` | NEW. One page, ~600 words: why the protocol exists, what it rewards, what it refuses to do. Dated. Ends with `[SIGNED BY - name, name]`. Placeholder body marked `[WHY - Roy to write]` | - |
+| `/why` | NEW. One page, ~600 words: why the protocol exists, what it rewards, what it refuses to do. Dated. Ends with `[SIGNED BY - name, name]`. Placeholder body marked `[WHY - the founder to write]` | - |
 | `/notices` | NEW. Dated feed of protocol-level events only: upgrade proposed/adopted, incident, election, pending transfer above threshold. Seed with 8 entries derived from the change log, the incident and the pending transfer | - |
 | `/notices/[slug]` | One notice | - |
 | `/ledger/blocks?p=` | Paginated blocks, 25/page | `P.blocks` |
@@ -83,7 +83,7 @@ Dummy banner: shown on every page while `SHOW_DUMMY_BANNER=true`. Text: "Simulat
 - Search resolves an address, a block number and a tx id
 - Lighthouse performance and accessibility ≥ 90 on `/`
 - README as above
-- Final message to me: repo URL, Railway URL, list of bracketed placeholders still on the site, the list of prototype rules that differ from the live chain, and which routes cannot be backed by the live API without new endpoints from Andrey
+- Final message to me: repo URL, Railway URL, list of bracketed placeholders still on the site, the list of prototype rules that differ from the live chain, and which routes cannot be backed by the live API without new endpoints from the tech lead
 
 ## Do not
 - Add analytics, cookies, wallet-connect, chat widgets, newsletter forms

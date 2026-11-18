@@ -139,7 +139,10 @@ td.wrap-ok{white-space:normal;min-width:240px}
 .stats.n4{grid-template-columns:repeat(4,minmax(0,1fr))}
 .stats.n5{grid-template-columns:repeat(5,minmax(0,1fr))}
 @media (max-width:1000px){.stats.n4 .stat,.stats.n5 .stat{border-right:0!important;border-bottom:1px solid var(--line)}.stats.n4 .stat:nth-child(odd),.stats.n5 .stat:nth-child(odd){border-right:1px solid var(--line)!important}}
-@media (min-width:1001px) and (max-width:1160px){.links{gap:16px}.search input{width:120px}}
+/* Eight nav links: tighter on wide screens, and the menu button takes over below 1180px
+   (the links, search and block pill no longer fit beside the brand there). */
+@media (min-width:1181px){.links{gap:18px}.search input{width:150px}}
+@media (min-width:1001px) and (max-width:1180px){.links{display:none}.links.open{display:flex;position:absolute;top:64px;left:0;right:0;flex-direction:column;align-items:flex-start;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 24px 16px;gap:12px}.menu-btn{display:inline-flex;align-items:center}}
 /* A bare 1fr track is minmax(auto,1fr): a wide table inside would stretch the page instead of scrolling. */
 @media (max-width:1000px){.two,.cards,.grid2,.walletgrid{grid-template-columns:minmax(0,1fr)}.walletgrid>*{min-width:0}.panel-h{flex-wrap:wrap}}
 @media (max-width:600px){.bar{min-width:48px}.sharebar{grid-template-columns:minmax(96px,1fr) 40px minmax(48px,1fr);gap:8px}}

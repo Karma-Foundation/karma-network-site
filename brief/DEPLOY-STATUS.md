@@ -1,11 +1,11 @@
 # Deploy status
 
-**CONNECTED - 22 Sep 2026.** Roy linked the Railway service to this repo. Every merge to
+**CONNECTED - 22 Sep 2026.** The founder linked the Railway service to this repo. Every merge to
 `main` now builds and deploys by itself.
 
 | | |
 |---|---|
-| Project | `karma-network` (`722c3a4f-4f32-4a99-a7fb-791293386234`), workspace "roeilevav's Projects" |
+| Project | `karma-network` (`722c3a4f-4f32-4a99-a7fb-791293386234`), the founder's workspace |
 | Service | `web` (`b6f7ff8b-42a8-429e-87d3-58b42c40b746`), environment `production` |
 | Source | `Karma-Foundation/karma-network-site`, branch `main` - verified |
 | Variables | `LEDGER_MODE=mock`, `SHOW_DUMMY_BANNER=true` - already set |
@@ -26,5 +26,5 @@ that puts a Next.js app at the repo root. Until then the URL answers 404.
   under `next start` - do not hardcode 3000); or a build that needs an env var the service
   does not have. You cannot read Railway's build logs from the cloud. Reproduce with
   `npm ci && npm run build && npm start` locally first - that catches nearly all of them - and
-  if it builds locally but fails on Railway, tell Roy exactly that and ask him for the log.
+  if it builds locally but fails on Railway, tell the founder exactly that and ask for the log.
 - `brief/` is reference only. Never import from it, never serve it.

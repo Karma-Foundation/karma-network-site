@@ -11,6 +11,7 @@ const LINKS = [
   { href: "/status", label: "Status", match: ["/status"] },
   { href: "/wallets", label: "Wallets", match: ["/wallets"] },
   { href: "/governance", label: "Governance", match: ["/governance"] },
+  { href: "/decisions", label: "Decisions", match: ["/decisions"] },
   { href: "/notices", label: "Notices", match: ["/notices"] },
   { href: "/documents", label: "Documents", match: ["/documents"] },
 ];

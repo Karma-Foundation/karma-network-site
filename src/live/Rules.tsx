@@ -5,6 +5,7 @@ import { KD, ago, dateStr, fmt, isoMs, pctDec, timeStr } from "@/lib/format";
 import { ERAS, MAX_SUPPLY, address, blocks, eraRateNow, firstBlock, halvingRule, history, overview, paramMap, parameters, protocolWallets, runners, supplyIdentity, type ParamChange } from "@/lib/ledger/live/data";
 import { ChangeTable, HalvingSentence, NotPublished, ShareBarsLive, shareRows } from "./parts";
 import { ETHERSCAN_TOKEN, bridgeBalance } from "@/lib/ledger/live/bridge";
+import { CUSTODY, custodyLine, custodyType } from "@/content/custody";
 
 export async function LiveProtocol() {
   const [ov, sup, p, latest] = await Promise.all([overview(), supplyIdentity(), paramMap(), blocks(1, 0)]);
@@ -80,26 +81,26 @@ export async function LiveProtocol() {
   );
 }
 
-export async function LiveGovernance() {
+/** The ledger's parameters and every change to them. Sits under the council's rules on /governance. */
+export async function LiveParameterRecord() {
   const [params, hist] = await Promise.all([parameters(), history()]);
   const cats = [...new Set(params.map((p) => p.category))].sort((a, b) => (a === "system" ? 1 : b === "system" ? -1 : a.localeCompare(b)));
   return (
-    <div className="wrap page">
-      <div className="kicker">Governance</div>
-      <h1>How the rules change</h1>
-      <p className="lede" style={{ margin: "16px 0 32px" }}>Every rule is a ledger parameter. A change is a config update included in a block and replayed by every runner; the ledger keeps the value before and after. This page is that record.</p>
+    <div id="parameters" style={{ marginTop: 64, scrollMarginTop: 96 }}>
+      <h2>Ledger parameters and change log</h2>
+      <p className="body" style={{ margin: "12px 0 24px", maxWidth: 720 }}>Every rule is a ledger parameter. A change is a config update included in a block and replayed by every runner; the ledger keeps the value before and after. This is that record.</p>
       <div className="panel">
         <div className="panel-h"><h3>Change log</h3><span className="muted small">{hist.length} changes, newest first</span></div>
         <ChangeTable list={hist} />
       </div>
       <div className="section" style={{ marginTop: 32 }}>
         <NotPublished title="Who may change a parameter">
-          <div>Every change so far is recorded under the actor <span className="mono">system:foundation</span>. The ledger does not publish who holds that key, how many signatures it needs, or any election or recall process. Signers, thresholds and terms: [DATE].</div>
+          <div>Every change so far is recorded under the actor <span className="mono">system:foundation</span>. The ledger does not publish who holds that key, how many signatures it needs, or any election or recall process.</div>
         </NotPublished>
       </div>
       {cats.map((c) => (
         <div className="section" key={c}>
-          <h2 style={{ marginBottom: 16, textTransform: "capitalize" }}>{c} parameters</h2>
+          <h3 style={{ marginBottom: 16, textTransform: "capitalize" }}>{c} parameters</h3>
           <div className="panel tw">
             <table>
               <thead><tr><th>Parameter</th><th>Value</th><th>Type</th><th>Last changed</th></tr></thead>
@@ -166,7 +167,7 @@ export async function LiveRunners() {
           <div className="panel-b list body f14">
             <div>All runners are operated by the protocol team today. None is independent.</div>
             <div>Runner rewards are switched {p.runner_rewards_enabled === "true" ? "on" : "off"} on the ledger (parameter runner_rewards_enabled).</div>
-            <div>Independent operators and how to become one: [DATE]. Setup guide [LINK]</div>
+            <div>Independent operators and how to become one: Not yet set. Setup guide: Not yet set.</div>
           </div>
         </div>
         <div className="panel">
@@ -286,14 +287,26 @@ export async function LiveWallets() {
           </table>
         </div>
         {vestedBeforeChain && (
-          <p className="muted f13" style={{ marginTop: 10 }}>Vesting began {dateStr(vestingStart)}, before the chain started. [REASON - one line from Andrey]</p>
+          <p className="muted f13" style={{ marginTop: 10 }}>Vesting began {dateStr(vestingStart)}, before the chain started. Reason: Not yet set.</p>
         )}
       </div>
 
-      <div className="section">
-        <NotPublished title="Signers and spending policy">
-          <div>The ledger does not record who can sign for these wallets, how many signatures a transfer needs, or a spending policy. Every outgoing transaction is on each wallet&apos;s address page. Signers, thresholds and policy: [DATE].</div>
-        </NotPublished>
+      <div className="section" id="key-custody" style={{ scrollMarginTop: 96 }}>
+        <h2 style={{ marginBottom: 12 }}>Key custody</h2>
+        <p className="body f14" style={{ maxWidth: 720, margin: "0 0 16px" }}>Who can sign for the council&apos;s two wallets. The ledger does not record signers or thresholds, so this is stated by the council and is not read from the ledger. Spending rules are on the <Link href="/governance">governance page</Link>.</p>
+        <div className="panel tw wp-table" style={{ margin: 0 }}>
+          <table>
+            <thead><tr><th>Wallet</th><th>Address</th><th>Type</th><th>Custody</th></tr></thead>
+            <tbody>{pw.pools.filter((x) => CUSTODY[x.name]).map((x) => (
+              <tr key={x.name}>
+                <td className="fw5" style={{ whiteSpace: "nowrap" }}>{x.label} pool</td>
+                <td style={{ whiteSpace: "nowrap" }}><Link className="mono" href={`/address/${x.public_address}`}>{x.public_address.slice(0, 8)}…{x.public_address.slice(-4)}</Link></td>
+                <td style={{ whiteSpace: "nowrap" }}>{custodyType(CUSTODY[x.name])}</td>
+                <td>{custodyLine(CUSTODY[x.name])}</td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

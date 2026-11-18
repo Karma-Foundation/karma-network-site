@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ADDRESS_RE, BLOCK_MS, GENESIS, PER_BLOCK, SHARES, TX_ID_RE } from "../rules";
 import { FOUNDATION, FOUNDATION_SENT, MockLedger, TECH, TECH_SENT } from "../mock";
 import { short } from "../../format";
+import { personNames } from "./guards";
 
 const HEIGHTS = [1, 2, 5000, 36423, 40000];
 const at = (h: number) => new MockLedger(() => GENESIS + (h - 1) * BLOCK_MS + 1234);
@@ -116,7 +117,7 @@ describe("MockLedger shapes", () => {
     const l = at(36423);
     const w = await l.wallets();
     const dump = JSON.stringify([w, await l.runners(), await l.upgrades(), await l.notices(), await l.incidents(), (await l.transactions(1, "Transfer")).items]);
-    expect(dump).not.toMatch(/\b(Roy|Roei|Andrey)\b/);
+    expect(personNames(dump)).toEqual([]);
     expect(w.foundation.signers.slice(0, 2).map((s) => s.name)).toEqual(["Person 1", "Person 2"]);
   });
 

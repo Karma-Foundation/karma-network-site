@@ -2,12 +2,18 @@
 
 | # | Item | Why deferred | Owner | Status |
 |---|---|---|---|---|
-| 1 | Unclaimed Kreators earn in their name without consent | Needs a protocol change | Andrey | open |
-| 2 | Auth-gated route under /api/v1/public/ (builders) contradicts "Auth: none" on the documents page, and /builders is missing from the endpoint list | Rename when client ids change | Andrey | open |
-| 3 | Protocol API is served from chain.karmaterminal.com, a product domain. Move the canonical API to a karmanetwork.org hostname (e.g. api.karmanetwork.org); keep chain.karmaterminal.com as an alias until every client has switched. The Karma Terminal runner stays on its own domain by design. | Needs a planned migration; nothing changes until then. | Andrey | open |
-| 4 | Why block 0 was re-sealed on 26 Jun and why vesting started 5 May | One line each for the site | Andrey | open |
-| 5 | Foundation pool outflows not itemised (~259K), Grants tab empty | API itemisation, #696 follow-up | Andrey | open |
-| 6 | Wallet 3775f434… 100% not itemised | Same as 5 | Andrey | open |
-| 7 | observer_last_verified_block:foundation-3 stuck at 4208 since 28 Jun | Dead parameter or verification not running | Andrey | open |
-| 8 | Foundation auto-stake wallet unlabelled; no bot vs human split of staked total | Needs the address from Andrey, then a site label | Andrey for the address, site for the label | open |
-| 9 | Ordinary wallets show first_seen = 26 Jun wallet-row re-creation, not earliest activity (example 4894fe60… has a transfer in block 1,561 on 10 Jun) | API fix, first_seen should be earliest activity | Andrey | open |
+| 1 | Unclaimed Kreators earn in their name without consent | Needs a protocol change | tech lead | open |
+| 2 | Auth-gated route under /api/v1/public/ (builders) contradicts "Auth: none" on the documents page, and /builders is missing from the endpoint list | Rename when client ids change | tech lead | open |
+| 3 | Protocol API is served from chain.karmaterminal.com, a product domain. Move the canonical API to a karmanetwork.org hostname (e.g. api.karmanetwork.org); keep chain.karmaterminal.com as an alias until every client has switched. The Karma Terminal runner stays on its own domain by design. | Needs a planned migration; nothing changes until then. | tech lead | open |
+| 4 | Why block 0 was re-sealed on 26 Jun and why vesting started 5 May | One line each for the site | tech lead | open |
+| 5 | Foundation pool outflows not itemised (~259K), Grants tab empty | API itemisation, #696 follow-up | tech lead | open |
+| 6 | Wallet 3775f434… 100% not itemised | Same as 5 | tech lead | open |
+| 7 | observer_last_verified_block:foundation-3 stuck at 4208 since 28 Jun | Dead parameter or verification not running | tech lead | open |
+| 8 | Foundation auto-stake wallet unlabelled; no bot vs human split of staked total | Needs the address from tech lead, then a site label | tech lead for the address, site for the label | open |
+| 9 | Ordinary wallets show first_seen = 26 Jun wallet-row re-creation, not earliest activity (example 4894fe60… has a transfer in block 1,561 on 10 Jun) | API fix, first_seen should be earliest activity | tech lead | open |
+| 10 | Council member names: Seat 1-3 and Signer 1-3 are published without names | Not published yet; decision for the council | product | open |
+| 11 | Council Constitution: the documents page says "To be published after signing", no link | Publish and link once signed | product | open |
+| 12 | Multisig switch on the wallets page: both council wallets are held with a single key; when 2 of 3 goes live, change `type` and `liveSince` in src/content/custody.ts | Multisig is not live | tech lead for the multisig, site for the record | open |
+| 13 | How decisions get posted long term: today each decision is one entry in src/content/decisions.ts, committed by hand | Fine for a small log; revisit when the volume or the number of editors grows | product | open |
+| 14 | Whitepaper section 10 - bring in line with the council text | A dated note at the top of the section points to the governance page; the section text itself is unchanged | product | open |
+| 15 | Home, Legal status wording - review | Left as it is for now | product | open |

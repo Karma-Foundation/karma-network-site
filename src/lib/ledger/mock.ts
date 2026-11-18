@@ -109,9 +109,9 @@ const txId = (block: number, idx: number): string =>
 /* ---------- runners ---------- */
 const RUNNERS = [
   { id: "runner-1", op: "Person 2 (protocol team)", city: "Frankfurt", since: 1, version: "v1.3.2", independent: false },
-  { id: "runner-2", op: "[Independent operator]", city: "Berlin", since: 9120, version: "v1.3.2", independent: true },
-  { id: "runner-3", op: "[Independent operator]", city: "Amsterdam", since: 14880, version: "v1.3.1", independent: true },
-  { id: "runner-4", op: "[Independent operator]", city: "Tel Aviv", since: 24110, version: "v1.3.2", independent: true },
+  { id: "runner-2", op: "Independent operator", city: "Berlin", since: 9120, version: "v1.3.2", independent: true },
+  { id: "runner-3", op: "Independent operator", city: "Amsterdam", since: 14880, version: "v1.3.1", independent: true },
+  { id: "runner-4", op: "Independent operator", city: "Tel Aviv", since: 24110, version: "v1.3.2", independent: true },
 ];
 /** Index of the runner the prototype shows one block behind. */
 const LAGGING_RUNNER = 2;
@@ -270,14 +270,14 @@ interface Chain {
 const SIGNERS_F: Signer[] = [
   { n: 1, name: "Person 1", role: "Founder, Karma community", key: "Fk2n…9aQe", since: "genesis", ends: "Jan 2027" },
   { n: 2, name: "Person 2", role: "Protocol engineering", key: "Wd7b…3xLp", since: "genesis", ends: "Jan 2027" },
-  { n: 3, name: "[Independent signer]", role: "[Name, affiliation, no financial relationship to founders]", key: "Qm4r…7vTn", since: "blk 18,400", ends: "May 2027" },
-  { n: 4, name: "[Independent signer]", role: "[Name, affiliation, no financial relationship to founders]", key: "Zs9c…2kHb", since: "blk 18,400", ends: "May 2027" },
-  { n: 5, name: "Seat open", role: "Community-elected. Nominations open until [DATE].", key: "-", since: "-", ends: "-", open: true },
+  { n: 3, name: "Independent signer", role: "Not yet set", key: "Qm4r…7vTn", since: "blk 18,400", ends: "May 2027" },
+  { n: 4, name: "Independent signer", role: "Not yet set", key: "Zs9c…2kHb", since: "blk 18,400", ends: "May 2027" },
+  { n: 5, name: "Seat open", role: "Community-elected. Nominations close: Not yet set.", key: "-", since: "-", ends: "-", open: true },
 ];
 const SIGNERS_T: Signer[] = [
   { n: 1, name: "Person 2", role: "Protocol engineering", key: "Wd7b…3xLp", since: "genesis", ends: "Jan 2027" },
   { n: 2, name: "Person 1", role: "Founder, Karma community", key: "Fk2n…9aQe", since: "genesis", ends: "Jan 2027" },
-  { n: 3, name: "[Independent runner operator]", role: "Operates runner-4", key: "Tn8v…5hRc", since: "blk 24,110", ends: "Jun 2027" },
+  { n: 3, name: "Independent runner operator", role: "Operates runner-4", key: "Tn8v…5hRc", since: "blk 24,110", ends: "Jun 2027" },
 ];
 const UPGRADES: Upgrade[] = [
   { v: "v1.4", block: null, title: "Reduce Foundation share to 10%; add Runner commitment to collective fund", signed: "0 of 5", status: "Proposed", proposed: "14 Sep 2026", notice: "14-day notice period starts on first signature", text: ["Foundation share of per-block issuance goes from 12% to 10%. The 2% moves to the Builders pool.", "Each Runner commits 20% of validator rewards to a collective fund for brand, awareness, grants and fraud response. The fund is a multisig outside the protocol; the protocol does not know about it.", "Requires 3 of 5 Foundation signatures and adoption by all 4 runners. No rule changes until both conditions are met."] },
@@ -315,7 +315,7 @@ function buildNotices(): Notice[] {
     };
   };
   const v11 = adopted("v1.1");
-  v11.body.push("Seat 5 of the Foundation wallet is community-elected and open. Nominations open until [DATE].");
+  v11.body.push("Seat 5 of the Foundation wallet is community-elected and open. Nominations close: Not yet set.");
   const bridge = CURATED.find((c) => c.to === BRIDGE)!;
   const v14 = up("v1.4");
   const v10 = up("v1.0");
