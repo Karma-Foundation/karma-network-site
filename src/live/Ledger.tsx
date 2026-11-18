@@ -30,7 +30,7 @@ export async function LiveBlocks({ page }: { page: number }) {
                   <td>{b.proposer_id ? <Link href="/runners">{b.proposer_id}</Link> : <span className="muted">-</span>}</td>
                   <td className="mono">{runnerSigners(b.signatures).length} runners</td>
                   <td className="right mono">{KD(b.emission_amount)}</td>
-                  <td className="mono muted small">{KD(b.community_amount)} builders · {KD(b.foundation_amount)} foundation · {KD(b.builders_amount)} tech · {KD(b.validators_amount)} validators</td>
+                  <td className="mono muted small">{KD(b.community_amount)} kreator rewards · {KD(b.foundation_amount)} foundation · {KD(b.builders_amount)} tech · {KD(b.validators_amount)} validators</td>
                   <td className={b.status === "finalized" ? "green" : "amber"}>{b.status}</td>
                 </tr>
               ))}
@@ -190,7 +190,7 @@ export async function LiveAddress({ addr: raw, page, type: rawType }: { addr: st
           <div className="panel tw"><table>
             <thead><tr><th>Allocation</th><th className="right">Total</th><th className="right">Released so far</th><th className="right">Per day</th><th>Vesting</th></tr></thead>
             <tbody>{pre.map((p) => (
-              <tr key={p.name}><td className="mono">{p.name}</td><td className="right mono">{KD(p.total_allocation)}</td><td className="right mono">{KD(p.total_released)} ({pctDec(p.total_released, p.total_allocation, 1)})</td><td className="right mono">{KD(p.daily_release)}</td><td className="mono muted">{p.vesting_start ? dateStr(isoMs(p.vesting_start)) : "-"} to {p.vesting_end ? dateStr(isoMs(p.vesting_end)) : "-"}</td></tr>
+              <tr key={p.name}><td className="fw5">{p.label}</td><td className="right mono">{KD(p.total_allocation)}</td><td className="right mono">{KD(p.total_released)} ({pctDec(p.total_released, p.total_allocation, 1)})</td><td className="right mono">{KD(p.daily_release)}</td><td className="mono muted">{p.vesting_start ? dateStr(isoMs(p.vesting_start)) : "-"} to {p.vesting_end ? dateStr(isoMs(p.vesting_end)) : "-"}</td></tr>
             ))}</tbody>
           </table></div>
         </div>
@@ -244,7 +244,7 @@ export async function LiveBlock({ n }: { n: number }) {
         <div className="k">State hash</div><Hash v={b.state_hash} />
         <div className="k">Emitted</div><div className="mono">{KD(b.emission_amount)}</div>
         <div className="k">Distribution</div>
-        <div className="mono" style={{ whiteSpace: "normal" }}>{KD(b.community_amount)} Builders pool · {KD(b.foundation_amount)} Foundation · {KD(b.builders_amount)} Tech Builders · {KD(b.validators_amount)} Validators</div>
+        <div className="mono" style={{ whiteSpace: "normal" }}>{KD(b.community_amount)} Kreator Rewards pool · {KD(b.foundation_amount)} Foundation · {KD(b.builders_amount)} Tech Builders · {KD(b.validators_amount)} Validators</div>
         <div className="k">Rewards paid</div>
         <div className="mono" style={{ whiteSpace: "normal" }}>staking {KD(b.staking_distributed)} (burned {KD(b.staking_burned)}) · transaction {KD(b.tx_reward_distributed)} (burned {KD(b.tx_reward_burned)})</div>
       </div>

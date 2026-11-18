@@ -173,11 +173,22 @@ export function addDec(...xs: (string | null | undefined)[]): string {
 }
 
 export interface Pool { name: string; label: string; public_address: string }
-export interface PreMine { name: string; public_address: string; total_allocation: string; total_released: string; daily_release: string; vesting_start: string | null; vesting_end: string | null }
+/**
+ * Display names the site uses instead of the API's own.
+ * The API calls the 73% emission pool "Builders", which reads as the Tech Builders
+ * wallet. It is the pool that pays Kreators and their stakers every block, so the
+ * site calls it "Kreator Rewards". The API's pre-mine rows carry a bare key
+ * ("builders" is the Tech Builders allocation), so those get the wallet's name too.
+ */
+const POOL_LABEL: Record<string, string> = { builders: "Kreator Rewards" };
+const PRE_MINE_LABEL: Record<string, string> = { builders: "Tech Builders", foundation: "Foundation" };
+export interface PreMine { name: string; label: string; public_address: string; total_allocation: string; total_released: string; daily_release: string; vesting_start: string | null; vesting_end: string | null }
 export async function protocolWallets(): Promise<{ pools: Pool[]; preMine: PreMine[]; labels: Record<string, string> }> {
   const d = await get<{ pools: unknown; pre_mine: unknown }>("/protocol-wallets");
-  const pools = asArray<Pool>(d.pools).filter((p) => ADDRESS_RE.test(p.public_address));
-  const preMine = asArray<PreMine>(d.pre_mine).filter((p) => ADDRESS_RE.test(p.public_address));
+  const pools = asArray<Pool>(d.pools).filter((p) => ADDRESS_RE.test(p.public_address)).map((p) => ({ ...p, label: POOL_LABEL[p.name] ?? p.label }));
+  // A pre-mine row is named after the wallet that holds it: the pool at the same address.
+  const preMine = asArray<PreMine>(d.pre_mine).filter((p) => ADDRESS_RE.test(p.public_address))
+    .map((p) => ({ ...p, label: pools.find((x) => x.public_address === p.public_address)?.label ?? PRE_MINE_LABEL[p.name] ?? p.name }));
   const labels: Record<string, string> = {};
   for (const p of pools) labels[p.public_address] = `${p.label} pool`;
   return { pools, preMine, labels };
