@@ -27,7 +27,7 @@ export function ShareBarsLive({ rows }: { rows: [string, string, string][] }) {
 }
 
 export const shareRows = (p: Record<string, string>): [string, string, string][] => [
-  ["Builders (Kreators + Stakers)", p.emission_builders_pct ?? "-", ""],
+  ["Kreator Rewards (Kreators + Stakers)", p.emission_builders_pct ?? "-", ""],
   ["Foundation", p.emission_foundation_pct ?? "-", "acc"],
   ["Tech Builders", p.emission_tech_builders_pct ?? "-", "acc"],
   ["Validators (Runners)", p.emission_validators_pct ?? "-", ""],

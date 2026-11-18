@@ -38,8 +38,8 @@ export async function LiveProtocol() {
         <div><h3 style={{ marginBottom: 8 }}>Distribution</h3><p className="body f14">Each block&apos;s emission is split the same way every time.</p></div>
         <div className="panel rows">
           <div className="k">Shares</div><div><ShareBarsLive rows={shareRows(p)} /></div>
-          <div className="k">Latest block</div><div className="mono">{b ? `${KD(b.community_amount)} Builders · ${KD(b.foundation_amount)} Foundation · ${KD(b.builders_amount)} Tech Builders · ${KD(b.validators_amount)} Validators` : "-"}</div>
-          <div className="k">Inside the Builders pool</div><div className="mono">{v("builders_pool_staking_share")}% staking rewards, {v("builders_pool_tx_share")}% transaction rewards. Unused transaction budget redirected to staking: {v("redirect_unused_tx_reward_to_staking_enabled")}.</div>
+          <div className="k">Latest block</div><div className="mono">{b ? `${KD(b.community_amount)} Kreator Rewards · ${KD(b.foundation_amount)} Foundation · ${KD(b.builders_amount)} Tech Builders · ${KD(b.validators_amount)} Validators` : "-"}</div>
+          <div className="k">Inside the Kreator Rewards pool</div><div className="mono">{v("builders_pool_staking_share")}% staking rewards, {v("builders_pool_tx_share")}% transaction rewards. Unused transaction budget redirected to staking: {v("redirect_unused_tx_reward_to_staking_enabled")}.</div>
           <div className="k">Runner rewards</div><div className="mono">paid to runners: {v("runner_rewards_enabled")}</div>
         </div>
       </div>
@@ -266,7 +266,7 @@ export async function LiveWallets() {
           ))}</tbody>
         </table>
       </div>
-      <p className="muted f13" style={{ marginTop: 10 }}>The Builders share is paid out to Kreators and stakers every block rather than accumulating; its wallet is the pass-through.</p>
+      <p className="muted f13" style={{ marginTop: 10 }}>The Kreator Rewards share is paid out every block as staking and transaction rewards to Kreators and their stakers. It does not accumulate; its wallet is the pass-through.</p>
 
       <div className="section" style={{ marginTop: 40 }}>
         <h2 style={{ marginBottom: 12 }}>Pre-mine</h2>
@@ -276,7 +276,7 @@ export async function LiveWallets() {
             <thead><tr><th>Allocation</th><th>Address</th><th className="right">Total</th><th className="right">Released so far</th><th className="right">Per day</th><th>Vesting</th></tr></thead>
             <tbody>{pw.preMine.map((x) => (
               <tr key={x.name}>
-                <td className="mono">{x.name}</td>
+                <td className="fw5">{x.label}</td>
                 <td><Link className="mono" href={`/address/${x.public_address}`}>{x.public_address.slice(0, 8)}…{x.public_address.slice(-4)}</Link>{pw.labels[x.public_address] && <> <span className="muted small">{pw.labels[x.public_address]}</span></>}</td>
                 <td className="right mono">{KD(x.total_allocation)}</td>
                 <td className="right mono">{KD(x.total_released)} ({pctDec(x.total_released, x.total_allocation, 1)})</td>
