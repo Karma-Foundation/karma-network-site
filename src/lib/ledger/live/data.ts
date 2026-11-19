@@ -52,7 +52,9 @@ export interface Overview {
   chain: { latest_block: { height: number; hash: string; sealed_at: string; signatures: number; signers_total: number }; block_interval_seconds: number };
   operators: { runners: { total: number; active: number; uptime_pct_3d: number }; validators: { total: number; active: number; blocks_archived: number } };
   wallets: { total: number; kreators: number };
-  staking: { total_staked: number; active_stakes: number; operations_all_time: number };
+  staking: { total_staked: number; foundation_program_staked?: number; community_staked?: number; active_stakes: number; operations_all_time: number };
+  /** The Foundation Staking Program: the Foundation's own staking wallets, reported apart from community holdings. */
+  foundation_staking?: { wallets: number; held: number; staked: number; active_stakes: number; kreators: number };
   supply: { community_held: number; burned: number; total_supply: number };
   transactions: { all_time: number };
 }

@@ -237,14 +237,10 @@ export async function LiveStatus() {
   );
 }
 
-/**
- * Foundation Staking Program snapshot. The public ledger API does not publish these figures yet
- * (Karma-Protocol#837), so they are stated by the Foundation with the block they were read at.
- */
-const FSP = { wallets: 200, held: "311101.375", staked: "309055.802", stakes: 11732, kreators: 735, networkStaked: "475115", block: 24737, date: "18 Nov 2026" };
-
 export async function LiveWallets() {
-  const [p, sup, latest, pw, start] = await Promise.all([paramMap(), supplyIdentity(), blocks(1, 0), protocolWallets(), firstBlock()]);
+  const [p, sup, latest, pw, start, ov] = await Promise.all([paramMap(), supplyIdentity(), blocks(1, 0), protocolWallets(), firstBlock(), overview()]);
+  const fsp = ov.foundation_staking;
+  const networkStaked = ov.staking.total_staked;
   const vestingStart = pw.preMine.map((x) => isoMs(x.vesting_start)).filter((t) => Number.isFinite(t)).sort((a, b) => a - b)[0];
   const vestedBeforeChain = vestingStart !== undefined && start !== null && vestingStart < isoMs(start.created_at);
   const b = latest[0];
@@ -299,15 +295,21 @@ export async function LiveWallets() {
 
       <div className="section" id="foundation-staking-program" style={{ scrollMarginTop: 96 }}>
         <h2 style={{ marginBottom: 12 }}>Foundation Staking Program</h2>
-        <p className="body f14" style={{ maxWidth: 720, margin: "0 0 12px" }}>The Foundation operates {FSP.wallets} staking wallets, funded by grants from the Foundation. They stake behind Kreators through the same staking mechanism every holder uses, with no special terms. Each stake earns the Kreator their share of the staking reward. The staker&apos;s share stays in the program wallets and is staked again.</p>
+        <p className="body f14" style={{ maxWidth: 720, margin: "0 0 12px" }}>The Foundation operates {fsp ? fmt(fsp.wallets) : 200} staking wallets, funded by grants from the Foundation. They stake behind Kreators through the same staking mechanism every holder uses, with no special terms. Each stake earns the Kreator their share of the staking reward. The staker&apos;s share stays in the program wallets and is staked again.</p>
         <p className="body f14" style={{ maxWidth: 720, margin: "0 0 12px" }}><span className="fw5">Commitment.</span> Karma in the program wallets is committed to the Kreator community and will not be returned to the Foundation. For now it is distributed through staking, under the program&apos;s rules. Any later form of distribution will also go to Kreators and their communities.</p>
         <p className="body f14" style={{ maxWidth: 720, margin: "0 0 16px" }}><span className="fw5">Reporting.</span> The program wallets are operated by the Foundation, so their balance is not counted as Karma in community hands. It is reported as its own figure. Staking totals include the program&apos;s stakes, so the program&apos;s part is stated here.</p>
-        <div className="cards">
-          <div className="card"><div className="cardk">Held by the program</div><div className="big">{KD(FSP.held)}</div><div className="d">{KD(FSP.staked)} staked across {FSP.wallets} wallets</div></div>
-          <div className="card"><div className="cardk">Kreators staked behind</div><div className="big">{fmt(FSP.kreators)}</div><div className="d">through {fmt(FSP.stakes)} stakes</div></div>
-          <div className="card"><div className="cardk">Share of all Karma in stake</div><div className="big">{pctDec(FSP.staked, FSP.networkStaked, 1)}</div><div className="d">{KD(FSP.staked)} of {KD(FSP.networkStaked)}</div></div>
-        </div>
-        <p className="muted f13" style={{ marginTop: 10 }}>Stated by the Foundation as of block {fmt(FSP.block)} ({FSP.date}). These figures are not read from the ledger on this page yet.</p>
+        {fsp ? (
+          <>
+            <div className="cards">
+              <div className="card"><div className="cardk">Held by the program</div><div className="big">{KD(fsp.held)}</div><div className="d">{KD(fsp.staked)} staked across {fmt(fsp.wallets)} wallets</div></div>
+              <div className="card"><div className="cardk">Kreators staked behind</div><div className="big">{fmt(fsp.kreators)}</div><div className="d">through {fmt(fsp.active_stakes)} stakes</div></div>
+              <div className="card"><div className="cardk">Share of all Karma in stake</div><div className="big">{networkStaked ? pctDec(fsp.staked, networkStaked, 1) : "-"}</div><div className="d">{KD(fsp.staked)} of {networkStaked ? KD(networkStaked) : "-"}</div></div>
+            </div>
+            <p className="muted f13" style={{ marginTop: 10 }}>Read from the ledger&apos;s network overview, in whole Karma.</p>
+          </>
+        ) : (
+          <p className="muted f13">The program&apos;s figures are not available from the ledger right now.</p>
+        )}
       </div>
 
       <div className="section" id="key-custody" style={{ scrollMarginTop: 96 }}>
