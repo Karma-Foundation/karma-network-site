@@ -53,7 +53,7 @@ export interface Overview {
   operators: { runners: { total: number; active: number; uptime_pct_3d: number }; validators: { total: number; active: number; blocks_archived: number } };
   wallets: { total: number; kreators: number };
   staking: { total_staked: number; foundation_program_staked?: number; community_staked?: number; active_stakes: number; operations_all_time: number };
-  /** The Foundation Staking Program: the Foundation's own staking wallets, reported apart from community holdings. */
+  /** The Foundation Staking Program: the Foundation's own staking wallets. Counted in community hands since 24 Nov 2026 (supply.community_held leaves them out, so add `held`), with the program's part always stated. */
   foundation_staking?: { wallets: number; held: number; staked: number; active_stakes: number; kreators: number };
   supply: { community_held: number; burned: number; total_supply: number };
   transactions: { all_time: number };
